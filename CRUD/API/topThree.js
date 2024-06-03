@@ -52,6 +52,8 @@ router.get("/department", (req, res, next) => {
   else res.send(arr);
 });
 
+//Average salary of all the employees in department
+
 router.get("/department/average/all", (req, res, next) => {
   const jsonFilePath = path.join(__dirname, "../../DATA/myFiles.json");
   if (!fs.existsSync(jsonFilePath)) {
@@ -87,7 +89,7 @@ router.get("/performance", (req, res, next) => {
     res.send("Data doesn't exists");
   }
   const empJSON = require(jsonFilePath);
-  const arr = empJSON.filter((elem) => elem.performance == performance);
+  const arr = empJSON.filter((elem) => elem.performance >= performance);
   if (arr.length === 0) res.send("No Employees with that performance range ");
   else res.send(arr);
 });

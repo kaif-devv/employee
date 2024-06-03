@@ -3,6 +3,8 @@ const fs = require("fs");
 const path = require("path");
 const router = express();
 var csvjson = require('csvjson');
+const dldpath = path.join(__dirname,'../../DATA/report.csv');
+
 
 router.get("/topThree", (req, res, next) => {
   const jsonFilePath = path.join(__dirname, "../../DATA/myFiles.json");
@@ -79,7 +81,9 @@ router.get("/report", (req, res, next) => {
     });
   });
   const csvdata = csvjson.toCSV(JSON.stringify(csvObj),{headers : "key"})
+  fs.writeFileSync(dldpath,csvdata)
   console.log(csvdata);
+  res.download(dldpath);
 // console.log(csvObj);
 });
 

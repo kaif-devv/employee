@@ -2,6 +2,7 @@ const express = require("express");
 const fs = require("fs");
 const path = require("path");
 const router = express();
+var csvjson = require('csvjson');
 
 router.get("/topThree", (req, res, next) => {
   const jsonFilePath = path.join(__dirname, "../../DATA/myFiles.json");
@@ -23,6 +24,8 @@ router.get("/topThree", (req, res, next) => {
   res.json(empJSON.slice(0, count));
 });
 
+//Average and total salary of 9 employees
+
 router.get("/average", (req, res, next) => {
   let total = 0;
   const jsonFilePath = path.join(__dirname, "../../DATA/myFiles.json");
@@ -35,8 +38,52 @@ router.get("/average", (req, res, next) => {
     total += elem.salary;
   });
   let avg = total / div;
-  res.send("the average Salary of " + empJSON.length + " employees is " + avg);
+  res.send("the average and Total Salary of " + empJSON.length + " employees is " + avg +" and "+ total);
 });
+
+//Report 
+
+router.get("/report", (req, res, next) => {
+  let total = 0;
+  const jsonFilePath = path.join(__dirname, "../../DATA/myFiles.json");
+  if (!fs.existsSync(jsonFilePath)) {
+    res.send("Data doesn't exists");
+  }
+  const empJSON = require(jsonFilePath);
+  let div = empJSON.length;
+  empJSON.map((elem) => {
+    total += elem.salary;
+  });
+  let avg = total / div;
+
+  let responseString = "";
+  const dptObj = {};
+  empJSON.map((e) => {
+    dptObj[e.department] = [];
+  });
+  empJSON.map((e) => {
+    dptObj[e.department].push(e.salary);
+  });
+  let csvObj = [];
+  Object.keys(dptObj).forEach((key) => {
+    const salaries = dptObj[key];
+    let sum = 0;
+    for (let i = 0; i < salaries.length; i++) {
+      sum += salaries[i];
+    }
+    let average = sum / salaries.length;
+    csvObj.push({
+      department: key,
+      totalExpenditure: sum,
+      averageSal: average
+    });
+  });
+  const csvdata = csvjson.toCSV(JSON.stringify(csvObj),{headers : "key"})
+  console.log(csvdata);
+// console.log(csvObj);
+});
+
+
 
 //Get employees by department
 
@@ -50,6 +97,20 @@ router.get("/department", (req, res, next) => {
   const arr = empJSON.filter((elem) => elem.department === department);
   if (arr.length === 0) res.send("No Employees in the department ");
   else res.send(arr);
+});
+
+//Employee Count by department
+
+router.get("/department/count", (req, res, next) => {
+  const department = req.query.dpt;
+  const jsonFilePath = path.join(__dirname, "../../DATA/myFiles.json");
+  if (!fs.existsSync(jsonFilePath)) {
+    res.send("Data doesn't exists");
+  }
+  const empJSON = require(jsonFilePath);
+  const arr = empJSON.filter((elem) => elem.department === department);
+  if (arr.length === 0) res.send("No Employees in the department ");
+  else res.send(`Number of employees in the ${department} department are ${arr.length}`);
 });
 
 //Average salary of all the employees in department

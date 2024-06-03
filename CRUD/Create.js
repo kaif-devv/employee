@@ -87,8 +87,9 @@ function createEmployee(req, res, next) {
   const empJSON = require(jsonFilePath);
   const updatedId = empJSON.length > 0 ? empJSON[empJSON.length - 1].id + 1 : 1;
   const index = empJSON.findIndex((elem) => elem.email === email);
-  if (index == -1) {
+  if (index === -1) {
     bcrypt.hash(password, 5, async function (err, hash) {
+      let d = Date(Date.now()).slice(4,15);
       const newEmployee = {
         name,
         age,
@@ -98,6 +99,8 @@ function createEmployee(req, res, next) {
         salary,
         password: hash,
         department,
+        joinDate :d,
+        performance: 3
       };
       empJSON.push(newEmployee);
       fs.writeFileSync(jsonFilePath, JSON.stringify(empJSON));

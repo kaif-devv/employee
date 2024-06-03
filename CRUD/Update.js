@@ -10,6 +10,7 @@ const {
   ageVerify,
   dptVerify,
   positionVerify,
+  performanceVerify,
 } = require("../Auth/dataVerify");
 
 function jwtVerification(req, res, next) {
@@ -101,6 +102,9 @@ function updatingEmployee(req, res, next) {
   if (updateEmployee.position) {
     empJSON[index].position = updateEmployee.position;
   }
+  if (updateEmployee.performance) {
+    empJSON[index].performance = updateEmployee.performance;
+  }
   if (updateEmployee.email) {
     let ei = empJSON.findIndex((elem) => elem.email === updateEmployee.email); //1
     if (ei !== -1 && ei !== index)
@@ -127,6 +131,15 @@ function updatingEmployee(req, res, next) {
   next();
 }
 
+function performanceCheck(req, res, next) {
+  const performance = req.body.performance;
+  let proceed = performanceVerify(performance);
+  if (proceed) next();
+  else {
+    res.send("Enter the performance rating between 0 and 5");
+  }
+}
+
 router.put(
   "/update/:id",
   jwtVerification,
@@ -136,6 +149,7 @@ router.put(
   ageCheck,
   dptCheck,
   positionCheck,
+  performanceCheck,
   updatingEmployee,
   (req, res) => {
     res.send("Employee details updated successfully ");

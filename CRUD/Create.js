@@ -11,7 +11,7 @@ const {
   ageVerify,
   dptVerify,
   positionVerify,
-} = require("../Auth/dataVerify");
+} = require("../Auth/dataVerify"); 
 
 function fieldsVerify(req, res, next) {
   const { name, age, email, password, salary, position, department } = req.body;

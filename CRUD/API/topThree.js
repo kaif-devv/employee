@@ -48,8 +48,34 @@ router.get("/department", (req, res, next) => {
   }
   const empJSON = require(jsonFilePath);
   const arr = empJSON.filter((elem) => elem.department === department);
-  if(arr.length===0) res.send("No Employees in the department ")
-    else res.send(arr);
+  if (arr.length === 0) res.send("No Employees in the department ");
+  else res.send(arr);
+});
+
+router.get("/department/average/all", (req, res, next) => {
+  const jsonFilePath = path.join(__dirname, "../../DATA/myFiles.json");
+  if (!fs.existsSync(jsonFilePath)) {
+    res.send("Data doesn't exists");
+  }
+  const empJSON = require(jsonFilePath);
+  const dptObj = {};
+  empJSON.map((e) => {
+    dptObj[e.department] = [];
+  });
+  empJSON.map((e) => {
+    dptObj[e.department].push(e.salary);
+  });
+  let responseString = "";
+  Object.keys(dptObj).forEach((key) => {
+    const salaries = dptObj[key];
+    let sum = 0;
+    for (let i = 0; i < salaries.length; i++) {
+      sum += salaries[i];
+    }
+    let avg = sum / salaries.length;
+    responseString += `The average sal of the department ${key} is ${avg}\n`;
+  });
+  res.send(responseString);
 });
 
 //Get employees on performance rating
@@ -62,10 +88,9 @@ router.get("/performance", (req, res, next) => {
   }
   const empJSON = require(jsonFilePath);
   const arr = empJSON.filter((elem) => elem.performance == performance);
-  if(arr.length===0) res.send("No Employees with that performance range ")
-    else res.send(arr);
+  if (arr.length === 0) res.send("No Employees with that performance range ");
+  else res.send(arr);
 });
-
 
 //Get average Salary by department
 

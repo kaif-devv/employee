@@ -13,7 +13,7 @@ function passVerify(password) {
   let capitalFlag = false;
   let numFlag = false;
   let smallFlag = false;
-  let specialFlag = false
+  let specialFlag = false;
 
   for (let i = 0; i < password.length; i++) {
     const char = password[i];

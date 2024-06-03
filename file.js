@@ -1,3 +1,7 @@
-let d = '6';
+const arr = [{
+department: "frontnd"
+}]
 
-console.log(d<='6');
+const array = arr.filter((elem) => elem.department === 'frontend');
+
+console.log(array);

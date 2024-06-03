@@ -38,8 +38,64 @@ router.get("/average", (req, res, next) => {
   res.send("the average Salary of " + empJSON.length + " employees is " + avg);
 });
 
+//Get employees by department
+
 router.get("/department", (req, res, next) => {
-  const department = req.query.department;
+  const department = req.query.dpt;
+  const jsonFilePath = path.join(__dirname, "../../DATA/myFiles.json");
+  if (!fs.existsSync(jsonFilePath)) {
+    res.send("Data doesn't exists");
+  }
+  const empJSON = require(jsonFilePath);
+  const arr = empJSON.filter((elem) => elem.department === department);
+  if (arr.length === 0) res.send("No Employees in the department ");
+  else res.send(arr);
+});
+
+router.get("/department/average/all", (req, res, next) => {
+  const jsonFilePath = path.join(__dirname, "../../DATA/myFiles.json");
+  if (!fs.existsSync(jsonFilePath)) {
+    res.send("Data doesn't exists");
+  }
+  const empJSON = require(jsonFilePath);
+  const dptObj = {};
+  empJSON.map((e) => {
+    dptObj[e.department] = [];
+  });
+  empJSON.map((e) => {
+    dptObj[e.department].push(e.salary);
+  });
+  let responseString = "";
+  Object.keys(dptObj).forEach((key) => {
+    const salaries = dptObj[key];
+    let sum = 0;
+    for (let i = 0; i < salaries.length; i++) {
+      sum += salaries[i];
+    }
+    let avg = sum / salaries.length;
+    responseString += `The average sal of the department ${key} is ${avg}\n`;
+  });
+  res.send(responseString);
+});
+
+//Get employees on performance rating
+
+router.get("/performance", (req, res, next) => {
+  const performance = req.query.performance;
+  const jsonFilePath = path.join(__dirname, "../../DATA/myFiles.json");
+  if (!fs.existsSync(jsonFilePath)) {
+    res.send("Data doesn't exists");
+  }
+  const empJSON = require(jsonFilePath);
+  const arr = empJSON.filter((elem) => elem.performance == performance);
+  if (arr.length === 0) res.send("No Employees with that performance range ");
+  else res.send(arr);
+});
+
+//Get average Salary by department
+
+router.get("/department/sal", (req, res, next) => {
+  const department = req.query.dpt;
   const jsonFilePath = path.join(__dirname, "../../DATA/myFiles.json");
   if (!fs.existsSync(jsonFilePath)) {
     res.send("Data doesn't exists");
@@ -53,4 +109,5 @@ router.get("/department", (req, res, next) => {
     `The max and min salary of department ${department} is ${maxSal} and ${minSal}`
   );
 });
+
 module.exports = router;

@@ -1,0 +1,22 @@
+[
+  {
+    "name": "kAIFFFF",
+    "age": 23,
+    "email": "q@gmail.com",
+    "id": 1,
+    "position": "SDE3",
+    "salary": 8000,
+    "password": "$2b$05$6tuiYd8GjtM7Df8oGr3U6uIKIwkfYShbHmNXZXa5XhvN.w9.Whxci",
+    "department": "frontend"
+  },
+  {
+    "name": "sec",
+    "age": 23,
+    "email": "p@gmail.com",
+    "id": 2,
+    "position": "SDE3",
+    "salary": 7000,
+    "password": "$2b$05$oeBngADgtin4n7lV/hPfQuItuf6M/HQlItqyoHHkPNcAE4wcwm1Vu",
+    "department": "backend"
+  }
+]

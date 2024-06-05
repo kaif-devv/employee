@@ -2,8 +2,8 @@ const express = require("express");
 const fs = require("fs");
 const path = require("path");
 const router = express();
-var csvjson = require('csvjson');
-const dldpath = path.join(__dirname,'../../DATA/report.csv');
+var csvJSON = require('csvjson');
+const downloadPath = path.join(__dirname,'../../DATA/report.csv');
 
 
 router.get("/topThree", (req, res, next) => {
@@ -58,7 +58,6 @@ router.get("/report", (req, res, next) => {
   });
   let avg = total / div;
 
-  let responseString = "";
   const dptObj = {};
   empJSON.map((e) => {
     dptObj[e.department] = [];
@@ -80,10 +79,9 @@ router.get("/report", (req, res, next) => {
       averageSal: average
     });
   });
-  const csvdata = csvjson.toCSV(JSON.stringify(csvObj),{headers : "key"})
-  fs.writeFileSync(dldpath,csvdata)
-  console.log(csvdata);
-  res.download(dldpath);
+  const csvData = csvJSON.toCSV(JSON.stringify(csvObj),{headers : "key"})
+  fs.writeFileSync(downloadPath,csvData)
+  res.download(downloadPath);
 // console.log(csvObj);
 });
 

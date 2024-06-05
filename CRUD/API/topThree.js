@@ -164,8 +164,6 @@ router.get("/sort/:id", fileExists, (req, res, next) => {
   const order = parseInt(req.params.id);
   const jsonFilePath = path.join(__dirname, "../../DATA/myFiles.json");
   const empJSON = require(jsonFilePath);
-  console.log(order);
-  console.log(field);
   sortBy(empJSON, order, field); //sorting function
   res.json(empJSON);
 });

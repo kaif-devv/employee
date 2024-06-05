@@ -184,4 +184,22 @@ router.put("/updateall", fileExists, (req, res, next) => {
   res.send("Salaries updated successfully");
 });
 
+//Implement a feature to track changes to employee records, Create an endpoint to fetch the history of changes made to a specific employee record. Store previous versions of employee data and create an endpoint to fetch the change history for a specific employee.
+
+router.get("/history/:id", fileExists, (req, res, next) => {
+  const id = parseInt(req.params.id);
+  const jsonFilePath = path.join(__dirname, "../../DATA/myFiles.json");
+  const empJSON = require(jsonFilePath);
+  const index = empJSON.findIndex((elem) => elem.id === id);
+  if (index === -1) {
+    res.send("Employee not found");
+  }
+  const historyFilePath = path.join(__dirname, "../../DATA/history.json");
+  const historyJSON = require(historyFilePath);
+  let filteredEmployees = historyJSON.filter((elem)=> elem.id === id);
+  let vari = filteredEmployees[filteredEmployees.length-1]
+  res.send(`The employee update history of the employee \n ${JSON.stringify(empJSON[index])} \n is \n ${JSON.stringify(vari)}`)
+  // res.send(vari)
+});
+
 module.exports = router;

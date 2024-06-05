@@ -82,27 +82,68 @@ function positionCheck(req, res, next) {
 function updatingEmployee(req, res, next) {
   const updateEmployee = req.body;
   const prevPassword = updateEmployee.prevPassword;
-
   const id = parseInt(req.params.id);
+
+  const historyPath = path.join(__dirname, "../DATA/history.json");
+  const empHistory = require(historyPath);
+  const empHistoryId =
+    empHistory.length > 0
+      ? empHistory[empHistory.length - 1].empHistoryId + 1
+      : 1;
+
+  const updatedOBJ = {
+    id: id,
+    empHistoryId: empHistoryId,
+    updatedOn: Date(Date.now()).slice(4,33),
+  };
+
   const jsonFilePath = path.join(__dirname, "../DATA/myFiles.json");
   const empJSON = require(jsonFilePath);
-  const index = empJSON.findIndex((elem) => elem.id === id); //0
+  const index = empJSON.findIndex((elem) => elem.id === id); //
+
   if (index === -1) {
     res.send("Employee not found");
   }
   if (updateEmployee.name) {
+    updatedOBJ.name = {
+      prevName: empJSON[index].name,
+      currentName: updateEmployee.name,
+    };
     empJSON[index].name = updateEmployee.name;
   }
+  if (updateEmployee.salary) {
+    updatedOBJ.salary = {
+      prevSalary: empJSON[index].salary,
+      currentSalary: updateEmployee.salary,
+    };
+    empJSON[index].salary = updateEmployee.salary;
+  }
   if (updateEmployee.age) {
+    updatedOBJ.age = {
+      prevAge: empJSON[index].age,
+      currentAge: updateEmployee.age,
+    };
     empJSON[index].age = updateEmployee.age;
   }
   if (updateEmployee.department) {
+    updatedOBJ.department = {
+      prevDpt: empJSON[index].department,
+      currentDpt: updateEmployee.department,
+    };
     empJSON[index].department = updateEmployee.department;
   }
   if (updateEmployee.position) {
+    updatedOBJ.position = {
+      prevPosition: empJSON[index].position,
+      currentPosition: updateEmployee.position,
+    };
     empJSON[index].position = updateEmployee.position;
   }
   if (updateEmployee.performance) {
+    updatedOBJ.performance = {
+      prevPerformance: empJSON[index].performance,
+      currentPerformance: updateEmployee.performance,
+    };
     empJSON[index].performance = updateEmployee.performance;
   }
   if (updateEmployee.email) {
@@ -110,6 +151,10 @@ function updatingEmployee(req, res, next) {
     if (ei !== -1 && ei !== index)
       res.send("Employee with this email already exists");
     else {
+      updatedOBJ.email = {
+        prevEmail: empJSON[index].email,
+        currentEmail: updateEmployee.email,
+      };
       empJSON[index].email = updateEmployee.email;
     }
   }
@@ -123,10 +168,17 @@ function updatingEmployee(req, res, next) {
       } else {
         const hash = bcrypt.hashSync(updateEmployee.password, 5);
         empJSON[index].password = hash;
+        updatedOBJ.password = {
+          prevpassword: empJSON[index].password,
+          currentpassword: hash
+        };
+        updatedOBJ.password = hash;
         res.send("Password updated successfully");
       }
     }
   }
+  empHistory.push(updatedOBJ);
+  fs.writeFileSync(historyPath, JSON.stringify(empHistory));
   fs.writeFileSync(jsonFilePath, JSON.stringify(empJSON));
   next();
 }

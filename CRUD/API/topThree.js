@@ -30,7 +30,7 @@ router.get("/topThree", (req, res, next) => {
 
 //Average and total salary of 9 employees
 
-router.get("/average",fileExists, (req, res, next) => {
+router.get("/average", fileExists, (req, res, next) => {
   let total = 0;
   const jsonFilePath = path.join(__dirname, "../../DATA/myFiles.json");
   const empJSON = require(jsonFilePath);
@@ -51,7 +51,7 @@ router.get("/average",fileExists, (req, res, next) => {
 
 //Report which generates CSV
 
-router.get("/report",fileExists, (req, res, next) => {
+router.get("/report", fileExists, (req, res, next) => {
   const jsonFilePath = path.join(__dirname, "../../DATA/myFiles.json");
   const empJSON = require(jsonFilePath);
   const dptObj = {};
@@ -83,7 +83,7 @@ router.get("/report",fileExists, (req, res, next) => {
 
 //Get employees by department
 
-router.get("/department",fileExists, (req, res, next) => {
+router.get("/department", fileExists, (req, res, next) => {
   const department = req.query.dpt;
   const jsonFilePath = path.join(__dirname, "../../DATA/myFiles.json");
   const empJSON = require(jsonFilePath);
@@ -94,7 +94,7 @@ router.get("/department",fileExists, (req, res, next) => {
 
 //Employee Count by department
 
-router.get("/department/count",fileExists, (req, res, next) => {
+router.get("/department/count", fileExists, (req, res, next) => {
   const department = req.query.dpt;
   const jsonFilePath = path.join(__dirname, "../../DATA/myFiles.json");
   const empJSON = require(jsonFilePath);
@@ -108,7 +108,7 @@ router.get("/department/count",fileExists, (req, res, next) => {
 
 //Average salary of all the employees in department
 
-router.get("/department/average/all",fileExists, (req, res, next) => {
+router.get("/department/average/all", fileExists, (req, res, next) => {
   const jsonFilePath = path.join(__dirname, "../../DATA/myFiles.json");
   const empJSON = require(jsonFilePath);
   const dptObj = {};
@@ -133,10 +133,10 @@ router.get("/department/average/all",fileExists, (req, res, next) => {
 
 //Get employees on performance rating
 
-router.get("/performance",fileExists, (req, res, next) => {
+router.get("/performance", fileExists, (req, res, next) => {
   const performance = req.query.performance;
   const jsonFilePath = path.join(__dirname, "../../DATA/myFiles.json");
- 
+
   const empJSON = require(jsonFilePath);
   const arr = empJSON.filter((elem) => elem.performance >= performance);
   if (arr.length === 0) res.send("No Employees with that performance range ");
@@ -145,7 +145,7 @@ router.get("/performance",fileExists, (req, res, next) => {
 
 //Get average Salary by department
 
-router.get("/department/sal",fileExists, (req, res, next) => {
+router.get("/department/sal", fileExists, (req, res, next) => {
   const department = req.query.dpt;
   const jsonFilePath = path.join(__dirname, "../../DATA/myFiles.json");
   const empJSON = require(jsonFilePath);
@@ -159,15 +159,31 @@ router.get("/department/sal",fileExists, (req, res, next) => {
 });
 
 //endpoint to fetch employees sorted by a specific field (e.g., name, salary, joining date), Allow sorting in both ascending and descending order
-router.get("/sort/:id",fileExists, (req, res, next) => {
+router.get("/sort/:id", fileExists, (req, res, next) => {
   const field = req.query.field;
   const order = parseInt(req.params.id);
   const jsonFilePath = path.join(__dirname, "../../DATA/myFiles.json");
   const empJSON = require(jsonFilePath);
   console.log(order);
   console.log(field);
-  sortBy(empJSON, order, field);
+  sortBy(empJSON, order, field); //sorting function
   res.json(empJSON);
+});
+
+//Create an endpoint to update multiple employee records in one request, This can be used to apply a common change to a specific group of employees (e.g., annual salary increment).
+
+router.put("/updateall", fileExists, (req, res, next) => {
+  const toBeUpdatedEmployeIds = req.body.ids;
+  const salary = parseInt(req.query.salary)
+  //toBeUpdatedEmployeIds is an array of multiple ids which we have to update the salary
+  const jsonFilePath = path.join(__dirname, "../../DATA/myFiles.json");
+  const empJSON = require(jsonFilePath);
+  toBeUpdatedEmployeIds.map((id) => {
+    const index = empJSON.findIndex((elem) => elem.id === id);
+    empJSON[index].salary = salary;
+  });
+  fs.writeFileSync(jsonFilePath, JSON.stringify(empJSON));
+  res.send("Salaries updated successfully");
 });
 
 module.exports = router;

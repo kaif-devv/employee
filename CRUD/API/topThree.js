@@ -2,7 +2,6 @@ const express = require("express");
 const fs = require("fs");
 const path = require("path");
 const router = express();
-const { sortBy } = require("../../Auth/FunctionCalls");
 var csvJSON = require("csvjson");
 const downloadPath = path.join(__dirname, "../../DATA/report.csv");
 

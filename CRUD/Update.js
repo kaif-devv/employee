@@ -3,8 +3,10 @@ const fs = require("fs");
 const bcrypt = require("bcrypt");
 const router = express();
 const path = require("path");
+const {empJson} = require("../Auth/FunctionCalls");
 const { jwtVerify } = require("../Auth/verifyToken");
 const {
+  fileExists,
   passVerify,
   nameVerify,
   ageVerify,
@@ -85,6 +87,8 @@ function updatingEmployee(req, res, next) {
   const id = parseInt(req.params.id);
 
   const historyPath = path.join(__dirname, "../DATA/history.json");
+  const jsonFilePath = path.join(__dirname, "../DATA/myfiles.json");
+
   const empHistory = require(historyPath);
   const empHistoryId =
     empHistory.length > 0
@@ -96,9 +100,7 @@ function updatingEmployee(req, res, next) {
     empHistoryId: empHistoryId,
     updatedOn: Date(Date.now()).slice(4,33),
   };
-
-  const jsonFilePath = path.join(__dirname, "../DATA/myFiles.json");
-  const empJSON = require(jsonFilePath);
+  const empJSON = empJson();
   const index = empJSON.findIndex((elem) => elem.id === id); //
 
   if (index === -1) {
@@ -194,6 +196,7 @@ function performanceCheck(req, res, next) {
 
 router.put(
   "/update/:id",
+  fileExists,
   jwtVerification,
   fileVerify,
   nameCheck,

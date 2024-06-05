@@ -3,6 +3,8 @@ const fs = require("fs");
 const path = require("path");
 const router = express();
 const bcrypt = require("bcrypt");
+const {fileExists} = require("../Auth/dataVerify");
+const {empJson} = require("../Auth/FunctionCalls");
 
 const {
   allFieldsVerify,
@@ -84,7 +86,7 @@ function createEmployee(req, res, next) {
   if (!fs.existsSync(jsonFilePath)) {
     fs.writeFileSync(jsonFilePath, "[]");
   }
-  const empJSON = require(jsonFilePath);
+  const empJSON = empJson()
   const updatedId = empJSON.length > 0 ? empJSON[empJSON.length - 1].id + 1 : 1;
   const index = empJSON.findIndex((elem) => elem.email === email);
   if (index === -1) {

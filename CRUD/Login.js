@@ -1,13 +1,11 @@
 const express = require("express");
-const fs = require("fs");
-const path = require("path");
 const router = express.Router();
 const bcrypt = require("bcrypt");
 const { generateToken } = require("../Auth/generateToken");
+const {empJson} = require("../Auth/FunctionCalls");
 
-router.post("/", (req, res) => {
-  const jsonFilePath = path.join(__dirname, "../DATA/myFiles.json");
-  const empJSON = require(jsonFilePath);
+function login(req,res,next){
+  const empJSON = empJson()
   const { email, password } = req.body;
   const employee = empJSON.find((ele) => ele.email === email);
   if (!employee) res.send("Invalid Credentials or Employee doesn't exist");
@@ -27,5 +25,8 @@ router.post("/", (req, res) => {
     res.append("jwt_key", token);
     res.send("Login successful , token generated is " + token);
   });
-});
+}
+
+router.post("/", login);
+
 module.exports = router;

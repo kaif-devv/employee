@@ -1,9 +1,9 @@
 const express = require("express");
 const router = express();
-const path = require("path");
-const fs = require('fs')
-
+const {fileExists} = require("../Auth/dataVerify");
+const {empJson} = require("../Auth/FunctionCalls");
 const {jwtVerify} = require('../Auth/verifyToken');
+
 function jwtVerification(req, res, next) {
   const token = req.header("jwt_key");
   try {
@@ -14,17 +14,15 @@ function jwtVerification(req, res, next) {
   }
 }
 
-router.get("/read",jwtVerification, (req, res) => {
-  const jsonFilePath = path.join(__dirname, "../DATA/myFiles.json");
-  if (!fs.existsSync(jsonFilePath)) {
-    res.send("Data doesn't exists")
-  }
-  const empJSON= require(jsonFilePath)
+function read(req,res,next){
+  const empJSON= empJson();
   const name = req.query.name;
-  const employ = empJSON.filter((elem) => elem.name == name);
+  const employ = empJSON.filter((elem) => elem.name === name);
   if (employ.length === 0) res.send("employee not found");
   res.json(employ);
-});
+}
+
+router.get("/read",fileExists,jwtVerification,read);
 
 module.exports = router;
 

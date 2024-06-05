@@ -91,10 +91,21 @@ function positionVerify(position) {
 
 function performanceVerify(performance) {
   if (!performance) return true;
-  if (performance > '5' || performance < '0') {
+  if (performance > "5" || performance < "0") {
     return false;
   } else {
     return true;
+  }
+}
+
+function fileExists(req, res, next) {
+  const fs = require("fs");
+  const path = require("path");
+  const jsonFilePath = path.join(__dirname, "../DATA/myFiles.json");
+  if (!fs.existsSync(jsonFilePath)) {
+    res.send("Data doesn't exists");
+  } else {
+    next();
   }
 }
 
@@ -105,5 +116,6 @@ module.exports = {
   ageVerify,
   dptVerify,
   positionVerify,
-  performanceVerify
+  performanceVerify,
+  fileExists,
 };

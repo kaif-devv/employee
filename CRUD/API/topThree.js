@@ -2,9 +2,11 @@ const express = require("express");
 const fs = require("fs");
 const path = require("path");
 const router = express();
-var csvJSON = require('csvjson');
-const downloadPath = path.join(__dirname,'../../DATA/report.csv');
+const { sortBy } = require("../../Auth/FunctionCalls");
+var csvJSON = require("csvjson");
+const downloadPath = path.join(__dirname, "../../DATA/report.csv");
 
+const { fileExists } = require("../../Auth/dataVerify");
 
 router.get("/topThree", (req, res, next) => {
   const jsonFilePath = path.join(__dirname, "../../DATA/myFiles.json");
@@ -28,36 +30,30 @@ router.get("/topThree", (req, res, next) => {
 
 //Average and total salary of 9 employees
 
-router.get("/average", (req, res, next) => {
+router.get("/average",fileExists, (req, res, next) => {
   let total = 0;
   const jsonFilePath = path.join(__dirname, "../../DATA/myFiles.json");
-  if (!fs.existsSync(jsonFilePath)) {
-    res.send("Data doesn't exists");
-  }
   const empJSON = require(jsonFilePath);
   let div = empJSON.length;
   empJSON.map((elem) => {
     total += elem.salary;
   });
   let avg = total / div;
-  res.send("the average and Total Salary of " + empJSON.length + " employees is " + avg +" and "+ total);
+  res.send(
+    "the average and Total Salary of " +
+      empJSON.length +
+      " employees is " +
+      avg +
+      " and " +
+      total
+  );
 });
 
-//Report 
+//Report which generates CSV
 
-router.get("/report", (req, res, next) => {
-  let total = 0;
+router.get("/report",fileExists, (req, res, next) => {
   const jsonFilePath = path.join(__dirname, "../../DATA/myFiles.json");
-  if (!fs.existsSync(jsonFilePath)) {
-    res.send("Data doesn't exists");
-  }
   const empJSON = require(jsonFilePath);
-  let div = empJSON.length;
-  empJSON.map((elem) => {
-    total += elem.salary;
-  });
-  let avg = total / div;
-
   const dptObj = {};
   empJSON.map((e) => {
     dptObj[e.department] = [];
@@ -76,25 +72,20 @@ router.get("/report", (req, res, next) => {
     csvObj.push({
       department: key,
       totalExpenditure: sum,
-      averageSal: average
+      averageSal: average,
     });
   });
-  const csvData = csvJSON.toCSV(JSON.stringify(csvObj),{headers : "key"})
-  fs.writeFileSync(downloadPath,csvData)
+  const csvData = csvJSON.toCSV(JSON.stringify(csvObj), { headers: "key" });
+  fs.writeFileSync(downloadPath, csvData);
   res.download(downloadPath);
-// console.log(csvObj);
+  // console.log(csvObj);
 });
-
-
 
 //Get employees by department
 
-router.get("/department", (req, res, next) => {
+router.get("/department",fileExists, (req, res, next) => {
   const department = req.query.dpt;
   const jsonFilePath = path.join(__dirname, "../../DATA/myFiles.json");
-  if (!fs.existsSync(jsonFilePath)) {
-    res.send("Data doesn't exists");
-  }
   const empJSON = require(jsonFilePath);
   const arr = empJSON.filter((elem) => elem.department === department);
   if (arr.length === 0) res.send("No Employees in the department ");
@@ -103,25 +94,22 @@ router.get("/department", (req, res, next) => {
 
 //Employee Count by department
 
-router.get("/department/count", (req, res, next) => {
+router.get("/department/count",fileExists, (req, res, next) => {
   const department = req.query.dpt;
   const jsonFilePath = path.join(__dirname, "../../DATA/myFiles.json");
-  if (!fs.existsSync(jsonFilePath)) {
-    res.send("Data doesn't exists");
-  }
   const empJSON = require(jsonFilePath);
   const arr = empJSON.filter((elem) => elem.department === department);
   if (arr.length === 0) res.send("No Employees in the department ");
-  else res.send(`Number of employees in the ${department} department are ${arr.length}`);
+  else
+    res.send(
+      `Number of employees in the ${department} department are ${arr.length}`
+    );
 });
 
 //Average salary of all the employees in department
 
-router.get("/department/average/all", (req, res, next) => {
+router.get("/department/average/all",fileExists, (req, res, next) => {
   const jsonFilePath = path.join(__dirname, "../../DATA/myFiles.json");
-  if (!fs.existsSync(jsonFilePath)) {
-    res.send("Data doesn't exists");
-  }
   const empJSON = require(jsonFilePath);
   const dptObj = {};
   empJSON.map((e) => {
@@ -145,12 +133,10 @@ router.get("/department/average/all", (req, res, next) => {
 
 //Get employees on performance rating
 
-router.get("/performance", (req, res, next) => {
+router.get("/performance",fileExists, (req, res, next) => {
   const performance = req.query.performance;
   const jsonFilePath = path.join(__dirname, "../../DATA/myFiles.json");
-  if (!fs.existsSync(jsonFilePath)) {
-    res.send("Data doesn't exists");
-  }
+ 
   const empJSON = require(jsonFilePath);
   const arr = empJSON.filter((elem) => elem.performance >= performance);
   if (arr.length === 0) res.send("No Employees with that performance range ");
@@ -159,12 +145,9 @@ router.get("/performance", (req, res, next) => {
 
 //Get average Salary by department
 
-router.get("/department/sal", (req, res, next) => {
+router.get("/department/sal",fileExists, (req, res, next) => {
   const department = req.query.dpt;
   const jsonFilePath = path.join(__dirname, "../../DATA/myFiles.json");
-  if (!fs.existsSync(jsonFilePath)) {
-    res.send("Data doesn't exists");
-  }
   const empJSON = require(jsonFilePath);
   const arr = empJSON.filter((elem) => elem.department === department);
   arr.sort((a, b) => b.salary - a.salary);
@@ -173,6 +156,18 @@ router.get("/department/sal", (req, res, next) => {
   res.send(
     `The max and min salary of department ${department} is ${maxSal} and ${minSal}`
   );
+});
+
+//endpoint to fetch employees sorted by a specific field (e.g., name, salary, joining date), Allow sorting in both ascending and descending order
+router.get("/sort/:id",fileExists, (req, res, next) => {
+  const field = req.query.field;
+  const order = parseInt(req.params.id);
+  const jsonFilePath = path.join(__dirname, "../../DATA/myFiles.json");
+  const empJSON = require(jsonFilePath);
+  console.log(order);
+  console.log(field);
+  sortBy(empJSON, order, field);
+  res.json(empJSON);
 });
 
 module.exports = router;

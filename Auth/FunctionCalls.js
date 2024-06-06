@@ -151,4 +151,35 @@ function historyData(req,res,next){
   res.send(`The employee update history of the employee \n ${JSON.stringify(empJSON[index])} \n is \n ${JSON.stringify(vari)}`)
 }
 
-module.exports = { sortBy, empJson,getAverage,topThree,performance,dptCount,dptAvg ,empDpt,avgDptSal,sortParam,updateAll,historyData};
+function report(req,res,next){
+ var csvJSON = require("csvjson");
+let downloadPath = path.join(__dirname, "../DATA/report.csv");
+const empJSON = empJson();
+const dptObj = {};
+empJSON.map((e) => {
+  dptObj[e.department] = [];
+});
+empJSON.map((e) => {
+  dptObj[e.department].push(e.salary);
+});
+let csvObj = [];
+Object.keys(dptObj).forEach((key) => {
+  const salaries = dptObj[key];
+  let sum = 0;
+  for (let i = 0; i < salaries.length; i++) {
+    sum += salaries[i];
+  }
+  let average = sum / salaries.length;
+  csvObj.push({
+    department: key,
+    totalExpenditure: sum,
+    averageSal: average,
+  });
+});
+const csvData = csvJSON.toCSV(JSON.stringify(csvObj), { headers: "key" });
+fs.writeFileSync(downloadPath, csvData);
+res.download(downloadPath);
+
+}
+
+module.exports = { sortBy, empJson,getAverage,topThree,performance,dptCount,dptAvg ,empDpt,avgDptSal,sortParam,updateAll,historyData,report};

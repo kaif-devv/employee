@@ -1,13 +1,6 @@
 const path = require("path");
 const fs = require("fs");
 
-function sortBy(data, order, field) {
-  if (order === 1) {
-    return data.sort((a, b) => a[field] - b[field]);
-  } else if (order == -1) {
-    return data.sort((a, b) => b[field] - a[field]);
-  }
-}
 
 function empJson() {
   const jsonFilePath = path.join(__dirname, "../DATA/myFiles.json");
@@ -112,6 +105,13 @@ function avgDptSal(req, res) {
   );
 }
 
+function sortBy(data, order, field) {
+  if (order === 1) {
+    return data.sort((a, b) => a[field] - b[field]);
+  } else if (order == -1) {
+    return data.sort((a, b) => b[field] - a[field]);
+  }
+}
 function sortParam(req, res) {
   const field = req.query.field;
   const order = parseInt(req.params.id);

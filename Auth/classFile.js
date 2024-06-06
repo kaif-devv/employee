@@ -263,6 +263,17 @@ class Crud extends user {
     }
   }
 
+  static fileExists(req, res, next) {
+    const fs = require("fs");
+    const path = require("path");
+    const jsonFilePath = path.join(__dirname, "../DATA/myFiles.json");
+    if (!fs.existsSync(jsonFilePath)) {
+      res.send("Data doesn't exists");
+    } else {
+      next();
+    }
+  }
+
   static read(req, res, next) {
     const empJSON = Api.empJson();
     const name = req.query.name;

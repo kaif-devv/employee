@@ -16,7 +16,7 @@ function empJson() {
   else return false;
 }
 
-function getAverage(req,res){
+function getAverage(req, res) {
   let total = 0;
   const empJSON = empJson();
   let div = empJSON.length;
@@ -34,8 +34,7 @@ function getAverage(req,res){
   );
 }
 
-function topThree(req,res,next){
-  
+function topThree(req, res, next) {
   const empJSON = empJson();
   count = 0;
   empJSON.sort((a, b) => b.salary - a.salary);
@@ -51,7 +50,7 @@ function topThree(req,res,next){
   res.json(empJSON.slice(0, count));
 }
 
-function performance(req,res,next){
+function performance(req, res, next) {
   const performance = req.query.performance;
   const empJSON = empJson();
   const arr = empJSON.filter((elem) => elem.performance >= performance);
@@ -59,9 +58,9 @@ function performance(req,res,next){
   else res.send(arr);
 }
 
-function dptCount(req,res,next){
+function dptCount(req, res, next) {
   const department = req.query.dpt;
-  const empJSON = empJson()
+  const empJSON = empJson();
   const arr = empJSON.filter((elem) => elem.department === department);
   if (arr.length === 0) res.send("No Employees in the department ");
   else
@@ -70,8 +69,7 @@ function dptCount(req,res,next){
     );
 }
 
-function dptAvg(req,res,next){
-  
+function dptAvg(req, res, next) {
   const empJSON = empJson();
   const dptObj = {};
   empJSON.map((e) => {
@@ -93,16 +91,15 @@ function dptAvg(req,res,next){
   res.send(responseString);
 }
 
-
-function empDpt(req,res,next){
+function empDpt(req, res, next) {
   const department = req.query.dpt;
-  const empJSON = empJson()
+  const empJSON = empJson();
   const arr = empJSON.filter((elem) => elem.department === department);
   if (arr.length === 0) res.send("No Employees in the department ");
   else res.send(arr);
 }
 
-function avgDptSal(req,res){
+function avgDptSal(req, res) {
   const department = req.query.dpt;
   const jsonFilePath = path.join(__dirname, "../DATA/myFiles.json");
   const empJSON = require(jsonFilePath);
@@ -115,17 +112,17 @@ function avgDptSal(req,res){
   );
 }
 
-function sortParam(req,res){
+function sortParam(req, res) {
   const field = req.query.field;
   const order = parseInt(req.params.id);
-  const empJSON = empJson()
+  const empJSON = empJson();
   sortBy(empJSON, order, field); //sorting function
   res.json(empJSON);
 }
 
-function updateAll(req,res){
+function updateAll(req, res) {
   const toBeUpdatedEmployeIds = req.body.ids;
-  const salary = parseInt(req.query.salary)
+  const salary = parseInt(req.query.salary);
   //toBeUpdatedEmployeIds is an array of multiple ids which we have to update the salary
   const jsonFilePath = path.join(__dirname, "../DATA/myFiles.json");
   const empJSON = require(jsonFilePath);
@@ -137,7 +134,7 @@ function updateAll(req,res){
   res.send("Salaries updated successfully");
 }
 
-function historyData(req,res,next){
+function historyData(req, res, next) {
   const id = parseInt(req.params.id);
   const empJSON = empJson();
   const index = empJSON.findIndex((elem) => elem.id === id);
@@ -146,40 +143,57 @@ function historyData(req,res,next){
   }
   const historyFilePath = path.join(__dirname, "../DATA/history.json");
   const historyJSON = require(historyFilePath);
-  let filteredEmployees = historyJSON.filter((elem)=> elem.id === id);
-  let vari = filteredEmployees[filteredEmployees.length-1]
-  res.send(`The employee update history of the employee \n ${JSON.stringify(empJSON[index])} \n is \n ${JSON.stringify(vari)}`)
+  let filteredEmployees = historyJSON.filter((elem) => elem.id === id);
+  let vari = filteredEmployees[filteredEmployees.length - 1];
+  res.send(
+    `The employee update history of the employee \n ${JSON.stringify(
+      empJSON[index]
+    )} \n is \n ${JSON.stringify(vari)}`
+  );
 }
 
-function report(req,res,next){
- var csvJSON = require("csvjson");
-let downloadPath = path.join(__dirname, "../DATA/report.csv");
-const empJSON = empJson();
-const dptObj = {};
-empJSON.map((e) => {
-  dptObj[e.department] = [];
-});
-empJSON.map((e) => {
-  dptObj[e.department].push(e.salary);
-});
-let csvObj = [];
-Object.keys(dptObj).forEach((key) => {
-  const salaries = dptObj[key];
-  let sum = 0;
-  for (let i = 0; i < salaries.length; i++) {
-    sum += salaries[i];
-  }
-  let average = sum / salaries.length;
-  csvObj.push({
-    department: key,
-    totalExpenditure: sum,
-    averageSal: average,
+function report(req, res, next) {
+  var csvJSON = require("csvjson");
+  let downloadPath = path.join(__dirname, "../DATA/report.csv");
+  const empJSON = empJson();
+  const dptObj = {};
+  empJSON.map((e) => {
+    dptObj[e.department] = [];
   });
-});
-const csvData = csvJSON.toCSV(JSON.stringify(csvObj), { headers: "key" });
-fs.writeFileSync(downloadPath, csvData);
-res.download(downloadPath);
-
+  empJSON.map((e) => {
+    dptObj[e.department].push(e.salary);
+  });
+  let csvObj = [];
+  Object.keys(dptObj).forEach((key) => {
+    const salaries = dptObj[key];
+    let sum = 0;
+    for (let i = 0; i < salaries.length; i++) {
+      sum += salaries[i];
+    }
+    let average = sum / salaries.length;
+    csvObj.push({
+      department: key,
+      totalExpenditure: sum,
+      averageSal: average,
+    });
+  });
+  const csvData = csvJSON.toCSV(JSON.stringify(csvObj), { headers: "key" });
+  fs.writeFileSync(downloadPath, csvData);
+  res.download(downloadPath);
 }
 
-module.exports = { sortBy, empJson,getAverage,topThree,performance,dptCount,dptAvg ,empDpt,avgDptSal,sortParam,updateAll,historyData,report};
+module.exports = {
+  sortBy,
+  empJson,
+  getAverage,
+  topThree,
+  performance,
+  dptCount,
+  dptAvg,
+  empDpt,
+  avgDptSal,
+  sortParam,
+  updateAll,
+  historyData,
+  report,
+};

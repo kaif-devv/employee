@@ -3,7 +3,6 @@ const fs = require("fs");
 const path = require("path");
 const router = express();
 const bcrypt = require("bcrypt");
-const {fileExists} = require("../Auth/dataVerify");
 const {empJson} = require("../Auth/FunctionCalls");
 
 const {

@@ -2,11 +2,10 @@ const express = require("express");
 const fs = require("fs");
 const path = require("path");
 const router = express();
-var csvJSON = require("csvjson");
 const downloadPath = path.join(__dirname, "../../DATA/report.csv");
 
 const { fileExists } = require("../../Auth/dataVerify");
-const {getAverage,topThree,performance,dptCount,dptAvg,empDpt ,avgDptSal,sortParam,updateAll,historyData} = require('../../Auth/FunctionCalls')
+const {getAverage,topThree,performance,dptCount,dptAvg,empDpt ,avgDptSal,sortParam,updateAll,historyData,report} = require('../../Auth/FunctionCalls')
 
 
 //Top three employees with high salary
@@ -19,35 +18,7 @@ router.get("/average", fileExists, getAverage);
 
 //Report which generates CSV
 
-router.get("/report", fileExists, (req, res, next) => {
-  const jsonFilePath = path.join(__dirname, "../../DATA/myFiles.json");
-  const empJSON = require(jsonFilePath);
-  const dptObj = {};
-  empJSON.map((e) => {
-    dptObj[e.department] = [];
-  });
-  empJSON.map((e) => {
-    dptObj[e.department].push(e.salary);
-  });
-  let csvObj = [];
-  Object.keys(dptObj).forEach((key) => {
-    const salaries = dptObj[key];
-    let sum = 0;
-    for (let i = 0; i < salaries.length; i++) {
-      sum += salaries[i];
-    }
-    let average = sum / salaries.length;
-    csvObj.push({
-      department: key,
-      totalExpenditure: sum,
-      averageSal: average,
-    });
-  });
-  const csvData = csvJSON.toCSV(JSON.stringify(csvObj), { headers: "key" });
-  fs.writeFileSync(downloadPath, csvData);
-  res.download(downloadPath);
-  // console.log(csvObj);
-});
+router.get("/report", fileExists, report);
 
 //Get employees by department
 

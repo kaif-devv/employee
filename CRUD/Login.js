@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { user } = require("../Auth/classFile"); // Class user
-router.post("/", user.login);
+const { User } = require("../Auth/classFile"); // Class user
+router.post("/", User.login);
 
 module.exports = router;

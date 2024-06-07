@@ -3,7 +3,9 @@ const jwt = require("jsonwebtoken");
 dotenv.config();
 const path = require("path");
 const fs = require("fs");
+const bcrypt = require("bcrypt");
 
+//Class related to JWT Operations
 class Jwt {
   //Verifying the Token
   static jwtVerify(token) {
@@ -18,6 +20,8 @@ class Jwt {
     return token;
   }
 }
+
+//Class related to API calls
 
 class Api extends Jwt {
   //Getting the Top Three Elements
@@ -226,7 +230,9 @@ class Api extends Jwt {
   }
 }
 
-class user extends Api {
+//Class related to User Login,register and update
+
+class User extends Api {
   static login(req, res, next) {
     const bcrypt = require("bcrypt");
     const empJSON = Api.empJson();
@@ -250,9 +256,150 @@ class user extends Api {
       res.send("Login successful , token generated is " + token);
     });
   }
+
+  static createEmployee(req, res, next) {
+    const { name, age, email, password, position, salary, department } =
+      req.body;
+    const jsonFilePath = path.join(__dirname, "../DATA/myFiles.json");
+    if (!fs.existsSync(jsonFilePath)) {
+      fs.writeFileSync(jsonFilePath, "[]");
+    }
+    const empJSON = Api.empJson();
+    const updatedId =
+      empJSON.length > 0 ? empJSON[empJSON.length - 1].id + 1 : 1;
+    const index = empJSON.findIndex((elem) => elem.email === email);
+    if (index === -1) {
+      bcrypt.hash(password, 5, async function (err, hash) {
+        let d = Date(Date.now()).slice(4, 15);
+        const newEmployee = {
+          name,
+          age,
+          email,
+          id: updatedId,
+          position,
+          salary,
+          password: hash,
+          department,
+          joinDate: d,
+          performance: 3,
+        };
+        empJSON.push(newEmployee);
+        fs.writeFileSync(jsonFilePath, JSON.stringify(empJSON));
+        res.status(201).json("New Employee has been created successfully");
+      });
+    } else {
+      res.send("Employee already exists ");
+    }
+  }
+
+  static updateEmployee(req, res, next) {
+    const updateEmployee = req.body;
+    const prevPassword = updateEmployee.prevPassword;
+    const id = parseInt(req.params.id);
+
+    const historyPath = path.join(__dirname, "../DATA/history.json");
+    const jsonFilePath = path.join(__dirname, "../DATA/myfiles.json");
+
+    const empHistory = require(historyPath);
+    const empHistoryId =
+      empHistory.length > 0
+        ? empHistory[empHistory.length - 1].empHistoryId + 1
+        : 1;
+
+    const updatedOBJ = {
+      id: id,
+      empHistoryId: empHistoryId,
+      updatedOn: Date(Date.now()).slice(4, 33),
+    };
+    const empJSON = require(jsonFilePath);
+    const index = empJSON.findIndex((elem) => elem.id === id); //
+
+    if (index === -1) {
+      res.send("Employee not found");
+    }
+    if (updateEmployee.name) {
+      updatedOBJ.name = {
+        prevName: empJSON[index].name,
+        currentName: updateEmployee.name,
+      };
+      empJSON[index].name = updateEmployee.name;
+    }
+    if (updateEmployee.salary) {
+      updatedOBJ.salary = {
+        prevSalary: empJSON[index].salary,
+        currentSalary: updateEmployee.salary,
+      };
+      empJSON[index].salary = updateEmployee.salary;
+    }
+    if (updateEmployee.age) {
+      updatedOBJ.age = {
+        prevAge: empJSON[index].age,
+        currentAge: updateEmployee.age,
+      };
+      empJSON[index].age = updateEmployee.age;
+    }
+    if (updateEmployee.department) {
+      updatedOBJ.department = {
+        prevDpt: empJSON[index].department,
+        currentDpt: updateEmployee.department,
+      };
+      empJSON[index].department = updateEmployee.department;
+    }
+    if (updateEmployee.position) {
+      updatedOBJ.position = {
+        prevPosition: empJSON[index].position,
+        currentPosition: updateEmployee.position,
+      };
+      empJSON[index].position = updateEmployee.position;
+    }
+    if (updateEmployee.performance) {
+      updatedOBJ.performance = {
+        prevPerformance: empJSON[index].performance,
+        currentPerformance: updateEmployee.performance,
+      };
+      empJSON[index].performance = updateEmployee.performance;
+    }
+    if (updateEmployee.email) {
+      let ei = empJSON.findIndex((elem) => elem.email === updateEmployee.email); //1
+      if (ei !== -1 && ei !== index)
+        res.send("Employee with this email already exists");
+      else {
+        updatedOBJ.email = {
+          prevEmail: empJSON[index].email,
+          currentEmail: updateEmployee.email,
+        };
+        empJSON[index].email = updateEmployee.email;
+      }
+    }
+    if (updateEmployee.password) {
+      if (!prevPassword) {
+        res.send("Please enter old password");
+      } else {
+        const comp = bcrypt.compareSync(prevPassword, empJSON[index].password);
+        if (!comp) {
+          res.send("Your old password is incorrect");
+        } else {
+          const hash = bcrypt.hashSync(updateEmployee.password, 5);
+          empJSON[index].password = hash;
+          updatedOBJ.password = {
+            prevpassword: empJSON[index].password,
+            currentpassword: hash,
+          };
+          updatedOBJ.password = hash;
+          res.send("Password updated successfully");
+        }
+      }
+    }
+    empHistory.push(updatedOBJ);
+    fs.writeFileSync(historyPath, JSON.stringify(empHistory));
+    fs.writeFileSync(jsonFilePath, JSON.stringify(empJSON));
+    return next();
+  }
 }
 
-class Crud extends user {
+//Class related to JWT Operations
+
+class Crud extends User {
   static jwtVerification(req, res, next) {
     const token = req.header("jwt_key");
     try {
@@ -327,4 +474,122 @@ class Crud extends user {
   }
 }
 
-module.exports = { Jwt, Api, user, Crud };
+//Class related to JWT Operations
+
+class dataVerify extends Crud {
+  static fieldsVerify(req, res, next) {
+    const { name, age, email, password, salary, position, department } =
+      req.body;
+    if (
+      !name ||
+      !age ||
+      !position ||
+      !password ||
+      !salary ||
+      !email ||
+      !department
+    ) {
+      res.send("All fields required");
+    } else {
+      next();
+    }
+  }
+
+  static passwordCheck(req, res, next) {
+    const password = req.body.password;
+    if (!password) {
+      return next();
+    }
+    const specialCharRegex = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
+    let capitalFlag = false;
+    let numFlag = false;
+    let smallFlag = false;
+    let specialFlag = false;
+
+    for (let i = 0; i < password.length; i++) {
+      const char = password[i];
+      if (/[A-Z]/.test(char)) {
+        capitalFlag = true;
+      } else if (/[a-z]/.test(char)) {
+        smallFlag = true;
+      } else if (/[0-9]/.test(char)) {
+        numFlag = true;
+      } else if (specialCharRegex.test(char)) {
+        specialFlag = true;
+      }
+    }
+    if (!capitalFlag || !numFlag || !specialFlag || !smallFlag) {
+      res.send(
+        "Password must include uppercase, lowercase, number, and special character"
+      );
+    } else {
+      return next();
+    }
+  }
+
+  static nameCheck(req, res, next) {
+    const name = req.body.name;
+    if (!name) {
+      return next();
+    }
+    if (name.charAt(0) <= "9") {
+      res.send("Name should start with a letter");
+    } else {
+      return next();
+    }
+  }
+
+  static ageCheck(req, res, next) {
+    const age = req.body.age;
+    if (!age) {
+      return next();
+    }
+    if (age < 18 || age > 60) {
+      res.send("Enter the correct age");
+    } else {
+      return next();
+    }
+  }
+
+  static dptCheck(req, res, next) {
+    const department = req.body.department;
+    if (!department) {
+      return next();
+    }
+    if (
+      department !== "frontend" &&
+      department !== "backend" &&
+      department !== "fullstack"
+    ) {
+      res.send("Enter the correct department");
+    } else {
+      return next();
+    }
+  }
+
+  static positionCheck(req, res, next) {
+    const position = req.body.position;
+    if (!position) {
+     return next();
+    }
+    if (position !== "SDE1" && position !== "SDE2" && position !== "SDE3") {
+      res.send("Enter the correct position");
+    } else {
+     return next();
+    }
+  }
+
+  static performanceVerify(req, res, next) {
+    const performance = req.body.performance;
+    if (!performance) {
+      return next();
+    }
+    if (performance > "5" || performance < "0") {
+      res.send("Enter the performance rating between 0 and 5");
+    } else {
+      return next();
+    }
+  }
+}
+
+module.exports = { Jwt, Api, User, Crud, dataVerify };

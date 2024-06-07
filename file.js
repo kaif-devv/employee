@@ -1,1 +1,11 @@
-console.log(Date(Date.now()).slice(4,33))
+function jwtVerification(req, res, next) {
+    const token = req.header("jwt_key");
+    try {
+      Jwt.jwtVerify(token);
+      next();
+    } catch (error) {
+      res.send("Invalid user");
+    }
+  }
+
+  

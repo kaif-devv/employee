@@ -397,7 +397,7 @@ class User extends Api {
   }
 }
 
-//Class related to JWT Operations
+//Class related to Crud Operations
 
 class Crud extends User {
   static jwtVerification(req, res, next) {
@@ -474,7 +474,7 @@ class Crud extends User {
   }
 }
 
-//Class related to JWT Operations
+//Class related to verrification of Input Fields 
 
 class dataVerify extends Crud {
   static fieldsVerify(req, res, next) {

@@ -5,7 +5,7 @@ const deleteRoute = require("./CRUD/Delete.ts");
 const updateRoute = require("./CRUD/Update.ts");
 const searchRoute = require("./CRUD/Search.ts");
 const loginRoute = require("./CRUD/Login.ts");
-const topThreeEmp = require("./CRUD/API/topThree")
+const topThreeEmp = require("./CRUD/API/topThree.ts")
 const allRoute = require("./CRUD/All.ts");
 
 const app = express();

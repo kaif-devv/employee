@@ -2,7 +2,7 @@ const express = require("express");
 const router = express();
 
 const { fileExists } = require("../../Auth/dataVerify");
-const { Api } = require("../../Auth/classFile");
+const { Api } = require("../../Auth/classsFile.ts");
 
 //Top three employees with high salary
 
@@ -12,7 +12,7 @@ router.get("/topThree", fileExists, Api.topThree);
 
 router.get("/average", fileExists, Api.getAverage);
 
-//Report which generates CSV
+// //Report which generates CSV
 
 router.get("/report", fileExists, Api.report);
 

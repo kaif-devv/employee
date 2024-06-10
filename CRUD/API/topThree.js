@@ -2,11 +2,11 @@ const express = require("express");
 const router = express();
 
 const { fileExists } = require("../../Auth/dataVerify");
-const { Api } = require("../../Auth/classFile");
+const { Api,Crud } = require("../../Auth/classFile");
 
 //Top three employees with high salary
 
-router.get("/topThree", fileExists, Api.topThree);
+router.get("/topThree", Crud.fileExists, Api.topThree);
 
 //Average and total salary of all employees
 

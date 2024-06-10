@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express();
-const { dataVerify, User, Crud, Jwt } = require("../Auth/classFile");
+const { dataVerify, User, Crud } = require("../Auth/classFile");
 
 router.put(
   "/update/:id",

@@ -34,7 +34,6 @@ class Api extends Jwt {
         continue;
       } else {
         count = i + 1;
-        console.log(empJSON.slice(0, i + 1));
         break;
       }
     }
@@ -72,22 +71,6 @@ class Api extends Jwt {
         " and " +
         total
     );
-  }
-
-  static topThree(req, res, next) {
-    const empJSON = Api.empJson(); // using the static class
-    let count = 0;
-    empJSON.sort((a, b) => b.salary - a.salary);
-    for (let i = 2; i < empJSON.length; i++) {
-      if (empJSON[i].salary === empJSON[i + 1].salary) {
-        continue;
-      } else {
-        count = i + 1;
-        console.log(empJSON.slice(0, i + 1));
-        break;
-      }
-    }
-    res.json(empJSON.slice(0, count));
   }
 
   static performance(req, res, next) {

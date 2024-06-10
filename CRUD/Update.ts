@@ -12,10 +12,7 @@ router.put(
   dataVerify.dptCheck,
   dataVerify.positionCheck,
   dataVerify.performanceVerify,
-  User.updateEmployee,
-  (req, res) => {
-    res.send("Employee details updated successfully ");
-  }
+  User.updateEmployee
 );
 
 module.exports = router;

@@ -1,12 +1,12 @@
 const express = require("express");
-const readRoute = require("./CRUD/Read");
-const createRoute = require("./CRUD/Create");
-const deleteRoute = require("./CRUD/Delete");
-const updateRoute = require("./CRUD/Update");
-const searchRoute = require("./CRUD/Search");
-const loginRoute = require("./CRUD/Login");
+const readRoute = require("./CRUD/Read.ts");
+const createRoute = require("./CRUD/Create.ts");
+const deleteRoute = require("./CRUD/Delete.ts");
+const updateRoute = require("./CRUD/Update.ts");
+const searchRoute = require("./CRUD/Search.ts");
+const loginRoute = require("./CRUD/Login.ts");
 const topThreeEmp = require("./CRUD/API/topThree")
-const allRoute = require("./CRUD/All");
+const allRoute = require("./CRUD/All.ts");
 
 const app = express();
 const port = 3000;
@@ -50,7 +50,6 @@ app.use(updateRoute);
 //searching through params
 
 app.use(searchRoute);
-
 
 
 app.listen(port, () => {

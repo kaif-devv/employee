@@ -82,7 +82,6 @@ class Api extends Jwt {
         continue;
       } else {
         count = i + 1;
-        console.log(empJSON.slice(0, i + 1));
         break;
       }
     }
@@ -392,7 +391,7 @@ class User extends Api {
     empHistory.push(updatedOBJ);
     fs.writeFileSync(historyPath, JSON.stringify(empHistory));
     fs.writeFileSync(jsonFilePath, JSON.stringify(empJSON));
-    return next();
+    res.send("Employe updated successfullyy")
   }
 }
 

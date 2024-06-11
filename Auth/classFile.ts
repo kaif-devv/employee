@@ -5,6 +5,18 @@ const path = require("path");
 const fs = require("fs");
 const bcrypt = require("bcrypt");
 
+type empSchema = {
+  id: number;
+  name: string;
+  age: number;
+  email: string;
+  position: string;
+  salary: number;
+  password: string;
+  department: string;
+  performance: string;
+};
+
 //Class related to JWT Operations
 class Jwt {
   //Verifying the Token
@@ -14,7 +26,7 @@ class Jwt {
     return verify;
   }
   //Generating the Token
-  static generateToken(payload: { email: any; isAdmin: boolean; }) {
+  static generateToken(payload: { email: any; isAdmin: boolean }) {
     let jwtSecretKey = process.env.JWT_SECRET_KEY;
     const token = jwt.sign(payload, jwtSecretKey);
     return token;
@@ -25,10 +37,12 @@ class Jwt {
 
 class Api extends Jwt {
   //Getting the Top Three Elements
-  static topThree(req: any, res: { json: (arg0: any) => void; }, next: any) {
-    const empJSON = Api.empJson(); // using the static class
+  static topThree(req: any, res: { json: (arg0: any) => void }, next: any) {
+    const empJSON: empSchema[] = Api.empJson(); // using the static class
     let count = 0;
-    empJSON.sort((a: { salary: number; }, b: { salary: number; }) => b.salary - a.salary);
+    empJSON.sort(
+      (a: { salary: number }, b: { salary: number }) => b.salary - a.salary
+    );
     for (let i = 2; i < empJSON.length; i++) {
       if (empJSON[i].salary === empJSON[i + 1].salary) {
         continue;
@@ -47,19 +61,25 @@ class Api extends Jwt {
     else return false;
   }
 
-  static performance(req: { query: { performance: any; }; }, res: { send: (arg0: string) => void; }, next: any) {
+  static performance(
+    req: { query: { performance: any } },
+    res: { send: (arg0: string) => void },
+    next: any
+  ) {
     const performance = req.query.performance;
     const empJSON = Api.empJson(); // using the static class
-    const arr = empJSON.filter((elem: { performance: number; }) => elem.performance >= performance);
+    const arr = empJSON.filter(
+      (elem: { performance: number }) => elem.performance >= performance
+    );
     if (arr.length === 0) res.send("No Employees with that performance range ");
     else res.send(arr);
   }
 
-  static getAverage(req: any, res: { send: (arg0: string) => void; }) {
+  static getAverage(req: any, res: { send: (arg0: string) => void }) {
     let total = 0;
     const empJSON = Api.empJson(); // using the static class
     let div = empJSON.length;
-    empJSON.map((elem: { salary: number; }) => {
+    empJSON.map((elem: { salary: number }) => {
       total += elem.salary;
     });
     let avg = total / div;
@@ -73,13 +93,16 @@ class Api extends Jwt {
     );
   }
 
-  
- 
-
-  static dptCount(req: { query: { dpt: any; }; }, res: { send: (arg0: string) => void; }, next: any) {
+  static dptCount(
+    req: { query: { dpt: any } },
+    res: { send: (arg0: string) => void },
+    next: any
+  ) {
     const department = req.query.dpt;
     const empJSON = Api.empJson(); // using the static class
-    const arr = empJSON.filter((elem: { department: any; }) => elem.department === department);
+    const arr = empJSON.filter(
+      (elem: { department: any }) => elem.department === department
+    );
     if (arr.length === 0) res.send("No Employees in the department ");
     else
       res.send(
@@ -87,13 +110,13 @@ class Api extends Jwt {
       );
   }
 
-  static dptAvg(req: any, res: { send: (arg0: string) => void; }, next: any) {
+  static dptAvg(req: any, res: { send: (arg0: string) => void }, next: any) {
     const empJSON = Api.empJson(); // using the static class
-    const dptObj = {};
-    empJSON.map((e: { department: string | number; }) => {
+    const dptObj: { [key: string]: number[] } = {}; // Add index signature to dptObj
+    empJSON.map((e: { department: string | number }) => {
       dptObj[e.department] = [];
     });
-    empJSON.map((e: { department: string | number; salary: any; }) => {
+    empJSON.map((e: { department: string | number; salary: any }) => {
       dptObj[e.department].push(e.salary);
     });
     let responseString = "";
@@ -109,20 +132,33 @@ class Api extends Jwt {
     res.send(responseString);
   }
 
-  static empDpt(req: { query: { dpt: any; }; }, res: { send: (arg0: string) => void; }, next: any) {
+  static empDpt(
+    req: { query: { dpt: any } },
+    res: { send: (arg0: string) => void },
+    next: any
+  ) {
     const department = req.query.dpt;
     const empJSON = Api.empJson(); // using the static class
-    const arr = empJSON.filter((elem: { department: any; }) => elem.department === department);
+    const arr = empJSON.filter(
+      (elem: { department: any }) => elem.department === department
+    );
     if (arr.length === 0) res.send("No Employees in the department ");
     else res.send(arr);
   }
 
-  static avgDptSal(req: { query: { dpt: any; }; }, res: { send: (arg0: string) => void; }) {
+  static avgDptSal(
+    req: { query: { dpt: any } },
+    res: { send: (arg0: string) => void }
+  ) {
     const department = req.query.dpt;
     const jsonFilePath = path.join(__dirname, "../DATA/myFiles.json");
     const empJSON = require(jsonFilePath);
-    const arr = empJSON.filter((elem: { department: any; }) => elem.department === department);
-    arr.sort((a: { salary: number; }, b: { salary: number; }) => b.salary - a.salary);
+    const arr = empJSON.filter(
+      (elem: { department: any }) => elem.department === department
+    );
+    arr.sort(
+      (a: { salary: number }, b: { salary: number }) => b.salary - a.salary
+    );
     let maxSal = arr[0].salary;
     let minSal = arr[arr.length - 1].salary;
     res.send(
@@ -132,12 +168,21 @@ class Api extends Jwt {
 
   static sortBy(data: any[], order: number, field: string | number) {
     if (order === 1) {
-      return data.sort((a: { [x: string]: number; }, b: { [x: string]: number; }) => a[field] - b[field]);
+      return data.sort(
+        (a: { [x: string]: number }, b: { [x: string]: number }) =>
+          a[field] - b[field]
+      );
     } else if (order == -1) {
-      return data.sort((a: { [x: string]: number; }, b: { [x: string]: number; }) => b[field] - a[field]);
+      return data.sort(
+        (a: { [x: string]: number }, b: { [x: string]: number }) =>
+          b[field] - a[field]
+      );
     }
   }
-  static sortParam(req: { query: { field: any; }; params: { id: string; }; }, res: { json: (arg0: any) => void; }) {
+  static sortParam(
+    req: { query: { field: any }; params: { id: string } },
+    res: { json: (arg0: any) => void }
+  ) {
     const field = req.query.field;
     const order = parseInt(req.params.id);
     const empJSON = Api.empJson(); // using the static class
@@ -145,30 +190,39 @@ class Api extends Jwt {
     res.json(empJSON);
   }
 
-  static updateAll(req: { body: { ids: any; }; query: { salary: string; }; }, res: { send: (arg0: string) => void; }) {
+  static updateAll(
+    req: { body: { ids: any }; query: { salary: string } },
+    res: { send: (arg0: string) => void }
+  ) {
     const toBeUpdatedEmployeIds = req.body.ids;
     const salary = parseInt(req.query.salary);
     //toBeUpdatedEmployeIds is an array of multiple ids which we have to update the salary
     const jsonFilePath = path.join(__dirname, "../DATA/myFiles.json");
     const empJSON = require(jsonFilePath);
     toBeUpdatedEmployeIds.map((id: any) => {
-      const index = empJSON.findIndex((elem: { id: any; }) => elem.id === id);
+      const index = empJSON.findIndex((elem: { id: any }) => elem.id === id);
       empJSON[index].salary = salary;
     });
     fs.writeFileSync(jsonFilePath, JSON.stringify(empJSON));
     res.send("Salaries updated successfully");
   }
 
-  static historyData(req: { params: { id: string; }; }, res: { send: (arg0: string) => void; }, next: any) {
+  static historyData(
+    req: { params: { id: string } },
+    res: { send: (arg0: string) => void },
+    next: any
+  ) {
     const id = parseInt(req.params.id);
     const empJSON = Api.empJson(); // using the static class
-    const index = empJSON.findIndex((elem: { id: number; }) => elem.id === id);
+    const index = empJSON.findIndex((elem: { id: number }) => elem.id === id);
     if (index === -1) {
       res.send("Employee not found");
     }
     const historyFilePath = path.join(__dirname, "../DATA/history.json");
     const historyJSON = require(historyFilePath);
-    let filteredEmployees = historyJSON.filter((elem: { id: number; }) => elem.id === id);
+    let filteredEmployees = historyJSON.filter(
+      (elem: { id: number }) => elem.id === id
+    );
     let vari = filteredEmployees[filteredEmployees.length - 1];
     res.send(
       `The employee update history of the employee \n ${JSON.stringify(
@@ -177,18 +231,22 @@ class Api extends Jwt {
     );
   }
 
-  static report(req: any, res: { download: (arg0: any) => void; }, next: any) {
+  static report(req: any, res: { download: (arg0: any) => void }, next: any) {
     var csvJSON = require("csvjson");
     let downloadPath = path.join(__dirname, "../DATA/report.csv");
     const empJSON = Api.empJson(); // using the static class
-    const dptObj = {};
-    empJSON.map((e: { department: string | number; }) => {
+    const dptObj: { [key: string]: number[] } = {};
+    empJSON.map((e: { department: string | number }) => {
       dptObj[e.department] = [];
     });
-    empJSON.map((e: { department: string | number; salary: any; }) => {
+    empJSON.map((e: { department: string | number; salary: any }) => {
       dptObj[e.department].push(e.salary);
     });
-    let csvObj: { department: string; totalExpenditure: number; averageSal: number; }[] = [];
+    let csvObj: {
+      department: string;
+      totalExpenditure: number;
+      averageSal: number;
+    }[] = [];
     Object.keys(dptObj).forEach((key) => {
       const salaries = dptObj[key];
       let sum = 0;
@@ -211,31 +269,68 @@ class Api extends Jwt {
 //Class related to User Login,register and update
 
 class User extends Api {
-  static login(req: { body: { email: any; password: any; }; }, res: { send: (arg0: string) => void; status: (arg0: number) => { (): any; new(): any; send: { (arg0: string): any; new(): any; }; }; append: (arg0: string, arg1: any) => void; }, next: any) {
+  static login(
+    req: { body: { email: any; password: any } },
+    res: {
+      send: (arg0: string) => void;
+      status: (arg0: number) => {
+        (): any;
+        new (): any;
+        send: { (arg0: string): any; new (): any };
+      };
+      append: (arg0: string, arg1: any) => void;
+    },
+    next: any
+  ) {
     const bcrypt = require("bcrypt");
     const empJSON = Api.empJson();
     const { email, password } = req.body;
-    const employee = empJSON.find((ele: { email: any; }) => ele.email === email);
+    const employee = empJSON.find((ele: { email: any }) => ele.email === email);
     if (!employee) res.send("Invalid Credentials or Employee doesn't exist");
-    bcrypt.compare(password, employee.password, async (err: any, result: any) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).send("Internal Server Error");
+    bcrypt.compare(
+      password,
+      employee.password,
+      async (err: any, result: any) => {
+        if (err) {
+          console.error(err);
+          return res.status(500).send("Internal Server Error");
+        }
+        if (!result) {
+          return res.send("Your password is incorrect");
+        }
+        const payload = {
+          email: email,
+          isAdmin: true,
+        };
+        const token = Jwt.generateToken(payload); // Generated Token by jwt static generate method
+        res.append("jwt_key", token);
+        res.send("Login successful , token generated is " + token);
       }
-      if (!result) {
-        return res.send("Your password is incorrect");
-      }
-      const payload = {
-        email: email,
-        isAdmin: true,
-      };
-      const token = Jwt.generateToken(payload); // Generated Token by jwt static generate method
-      res.append("jwt_key", token);
-      res.send("Login successful , token generated is " + token);
-    });
+    );
   }
 
-  static createEmployee(req: { body: { name: any; age: any; email: any; password: any; position: any; salary: any; department: any; }; }, res: { status: (arg0: number) => { (): any; new(): any; json: { (arg0: string): void; new(): any; }; }; send: (arg0: string) => void; }, next: any) {
+  static createEmployee(
+    req: {
+      body: {
+        name: any;
+        age: any;
+        email: any;
+        password: any;
+        position: any;
+        salary: any;
+        department: any;
+      };
+    },
+    res: {
+      status: (arg0: number) => {
+        (): any;
+        new (): any;
+        json: { (arg0: string): void; new (): any };
+      };
+      send: (arg0: string) => void;
+    },
+    next: any
+  ) {
     const { name, age, email, password, position, salary, department } =
       req.body;
     const jsonFilePath = path.join(__dirname, "../DATA/myFiles.json");
@@ -245,10 +340,12 @@ class User extends Api {
     const empJSON = Api.empJson();
     const updatedId =
       empJSON.length > 0 ? empJSON[empJSON.length - 1].id + 1 : 1;
-    const index = empJSON.findIndex((elem: { email: any; }) => elem.email === email);
+    const index = empJSON.findIndex(
+      (elem: { email: any }) => elem.email === email
+    );
     if (index === -1) {
       bcrypt.hash(password, 5, async function (err: any, hash: any) {
-        let d = Date(Date.now()).slice(4, 15);
+        let d = Date.now().toString().slice(4, 33);
         const newEmployee = {
           name,
           age,
@@ -270,7 +367,11 @@ class User extends Api {
     }
   }
 
-  static updateEmployee(req: { body: any; params: { id: string; }; }, res: { send: (arg0: string) => void; }, next: any) {
+  static updateEmployee(
+    req: { body: any; params: { id: string } },
+    res: { send: (arg0: string) => void },
+    next: any
+  ) {
     const updateEmployee = req.body;
     const prevPassword = updateEmployee.prevPassword;
     const id = parseInt(req.params.id);
@@ -283,14 +384,49 @@ class User extends Api {
       empHistory.length > 0
         ? empHistory[empHistory.length - 1].empHistoryId + 1
         : 1;
-
-    const updatedOBJ = {
+    const updatedOBJ: {
+      id: number;
+      empHistoryId: any;
+      updatedOn: string;
+      name?: {
+        prevName: string;
+        currentName: string;
+      };
+      salary?: {
+        prevSalary: string | number;
+        currentSalary: string | number;
+      };
+      age?: {
+        prevAge: string | number;
+        currentAge: string | number;
+      };
+      department?: {
+        prevDpt: string;
+        currentDpt: string;
+      };
+      position?: {
+        prevPosition: string;
+        currentPosition: string;
+      };
+      performance?: {
+        prevPerformance: string | number;
+        currentPerformance: string | number;
+      };
+      email?: {
+        prevEmail: string;
+        currentEmail: string;
+      };
+      password?: {
+        prevpassword: any;
+        currentpassword: any;
+      };
+    } = {
       id: id,
       empHistoryId: empHistoryId,
-      updatedOn: Date(Date.now()).slice(4, 33),
+      updatedOn: Date.now().toString().slice(4, 33),
     };
     const empJSON = require(jsonFilePath);
-    const index = empJSON.findIndex((elem: { id: number; }) => elem.id === id); //
+    const index = empJSON.findIndex((elem: { id: number }) => elem.id === id); //
 
     if (index === -1) {
       res.send("Employee not found");
@@ -338,7 +474,9 @@ class User extends Api {
       empJSON[index].performance = updateEmployee.performance;
     }
     if (updateEmployee.email) {
-      let ei = empJSON.findIndex((elem: { email: any; }) => elem.email === updateEmployee.email); //1
+      let ei = empJSON.findIndex(
+        (elem: { email: any }) => elem.email === updateEmployee.email
+      ); //1
       if (ei !== -1 && ei !== index)
         res.send("Employee with this email already exists");
       else {
@@ -371,14 +509,18 @@ class User extends Api {
     empHistory.push(updatedOBJ);
     fs.writeFileSync(historyPath, JSON.stringify(empHistory));
     fs.writeFileSync(jsonFilePath, JSON.stringify(empJSON));
-    res.send("Employe updated successfullyy")
+    res.send("Employe updated successfullyy");
   }
 }
 
 //Class related to Crud Operations
 
 class Crud extends User {
-  static jwtVerification(req: { header: (arg0: string) => any; }, res: { send: (arg0: string) => void; }, next: () => void) {
+  static jwtVerification(
+    req: { header: (arg0: string) => any },
+    res: { send: (arg0: string) => void },
+    next: () => void
+  ) {
     const token = req.header("jwt_key");
     try {
       Jwt.jwtVerify(token);
@@ -388,7 +530,11 @@ class Crud extends User {
     }
   }
 
-  static fileExists(req: any, res: { send: (arg0: string) => void; }, next: () => void) {
+  static fileExists(
+    req: any,
+    res: { send: (arg0: string) => void },
+    next: () => void
+  ) {
     const fs = require("fs");
     const path = require("path");
     const jsonFilePath = path.join(__dirname, "../DATA/myFiles.json");
@@ -399,28 +545,40 @@ class Crud extends User {
     }
   }
 
-  static read(req: { query: { name: any; }; }, res: { send: (arg0: string) => void; json: (arg0: any) => void; }, next: any) {
+  static read(
+    req: { query: { name: any } },
+    res: { send: (arg0: string) => void; json: (arg0: any) => void },
+    next: any
+  ) {
     const empJSON = Api.empJson();
     const name = req.query.name;
-    const employ = empJSON.filter((elem: { name: any; }) => elem.name === name);
+    const employ = empJSON.filter((elem: { name: any }) => elem.name === name);
     if (employ.length === 0) res.send("employee not found");
     res.json(employ);
   }
 
-  static search(req: { params: { id: string; }; }, res: { send: (arg0: string) => void; }, next: any) {
+  static search(
+    req: { params: { id: string } },
+    res: { send: (arg0: string) => void },
+    next: any
+  ) {
     const empJSON = Api.empJson();
     const id = parseInt(req.params.id);
-    const e = empJSON.find((elem: { id: number; }) => elem.id === id);
+    const e = empJSON.find((elem: { id: number }) => elem.id === id);
     if (!e) res.send("Employee not found");
     else {
       res.send(e);
     }
   }
 
-  static deleteById(req: { params: { id: string; }; }, res: { send: (arg0: string) => void; }, next: any) {
+  static deleteById(
+    req: { params: { id: string } },
+    res: { send: (arg0: string) => void },
+    next: any
+  ) {
     const empJSON = Api.empJson();
     const id = parseInt(req.params.id);
-    const index = empJSON.findIndex((elem: { id: number; }) => elem.id === id);
+    const index = empJSON.findIndex((elem: { id: number }) => elem.id === id);
     if (index === -1) res.send("Employee not found");
     else {
       empJSON.splice(index, 1);
@@ -429,7 +587,11 @@ class Crud extends User {
     }
   }
 
-  static getAll(req: any, res: { json: (arg0: any) => void; send: (arg0: string) => void; }, next: any) {
+  static getAll(
+    req: any,
+    res: { json: (arg0: any) => void; send: (arg0: string) => void },
+    next: any
+  ) {
     const empJSON = Api.empJson();
     if (empJSON) res.json(empJSON);
     else {
@@ -437,7 +599,11 @@ class Crud extends User {
     }
   }
 
-  static getPaginated(req: { params: { id: string; }; }, res: { json: (arg0: any) => void; send: (arg0: string) => void; }, next: any) {
+  static getPaginated(
+    req: { params: { id: string } },
+    res: { json: (arg0: any) => void; send: (arg0: string) => void },
+    next: any
+  ) {
     const id = parseInt(req.params.id);
     const empJSON = Api.empJson();
     if (empJSON) {
@@ -452,10 +618,24 @@ class Crud extends User {
   }
 }
 
-//Class related to verrification of Input Fields 
+//Class related to verrification of Input Fields
 
 class dataVerify extends Crud {
-  static fieldsVerify(req: { body: { name: any; age: any; email: any; password: any; salary: any; position: any; department: any; }; }, res: { send: (arg0: string) => void; }, next: () => void) {
+  static fieldsVerify(
+    req: {
+      body: {
+        name: any;
+        age: any;
+        email: any;
+        password: any;
+        salary: any;
+        position: any;
+        department: any;
+      };
+    },
+    res: { send: (arg0: string) => void },
+    next: () => void
+  ) {
     const { name, age, email, password, salary, position, department } =
       req.body;
     if (
@@ -473,7 +653,11 @@ class dataVerify extends Crud {
     }
   }
 
-  static passwordCheck(req: { body: { password: any; }; }, res: { send: (arg0: string) => void; }, next: () => any) {
+  static passwordCheck(
+    req: { body: { password: any } },
+    res: { send: (arg0: string) => void },
+    next: () => any
+  ) {
     const password = req.body.password;
     if (!password) {
       return next();
@@ -505,7 +689,11 @@ class dataVerify extends Crud {
     }
   }
 
-  static nameCheck(req: { body: { name: any; }; }, res: { send: (arg0: string) => void; }, next: () => any) {
+  static nameCheck(
+    req: { body: { name: any } },
+    res: { send: (arg0: string) => void },
+    next: () => any
+  ) {
     const name = req.body.name;
     if (!name) {
       return next();
@@ -517,7 +705,11 @@ class dataVerify extends Crud {
     }
   }
 
-  static ageCheck(req: { body: { age: any; }; }, res: { send: (arg0: string) => void; }, next: () => any) {
+  static ageCheck(
+    req: { body: { age: any } },
+    res: { send: (arg0: string) => void },
+    next: () => any
+  ) {
     const age = req.body.age;
     if (!age) {
       return next();
@@ -529,7 +721,11 @@ class dataVerify extends Crud {
     }
   }
 
-  static dptCheck(req: { body: { department: any; }; }, res: { send: (arg0: string) => void; }, next: () => any) {
+  static dptCheck(
+    req: { body: { department: any } },
+    res: { send: (arg0: string) => void },
+    next: () => any
+  ) {
     const department = req.body.department;
     if (!department) {
       return next();
@@ -545,19 +741,27 @@ class dataVerify extends Crud {
     }
   }
 
-  static positionCheck(req: { body: { position: any; }; }, res: { send: (arg0: string) => void; }, next: () => any) {
+  static positionCheck(
+    req: { body: { position: any } },
+    res: { send: (arg0: string) => void },
+    next: () => any
+  ) {
     const position = req.body.position;
     if (!position) {
-     return next();
+      return next();
     }
     if (position !== "SDE1" && position !== "SDE2" && position !== "SDE3") {
       res.send("Enter the correct position");
     } else {
-     return next();
+      return next();
     }
   }
 
-  static performanceVerify(req: { body: { performance: any; }; }, res: { send: (arg0: string) => void; }, next: () => any) {
+  static performanceVerify(
+    req: { body: { performance: any } },
+    res: { send: (arg0: string) => void },
+    next: () => any
+  ) {
     const performance = req.body.performance;
     if (!performance) {
       return next();

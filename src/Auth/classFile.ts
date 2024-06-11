@@ -64,7 +64,7 @@ class Api extends Jwt {
 
   static performance(
     req: { query: { performance: any } },
-    res: { send: (arg0: string) => void },
+    res: { send: (arg0: any) => void },
     next: any
   ) {
     const performance = req.query.performance;
@@ -76,7 +76,7 @@ class Api extends Jwt {
     else res.send(arr);
   }
 
-  static getAverage(req: any, res: { send: (arg0: string) => void }) {
+  static getAverage(req: any, res: { send: (arg0: any) => void }) {
     let total = 0;
     const empJSON = Api.empJson(); // using the static class
     let div = empJSON.length;
@@ -96,7 +96,7 @@ class Api extends Jwt {
 
   static dptCount(
     req: { query: { dpt: any } },
-    res: { send: (arg0: string) => void },
+    res: { send: (arg0: any) => void },
     next: any
   ) {
     const department = req.query.dpt;
@@ -111,7 +111,7 @@ class Api extends Jwt {
       );
   }
 
-  static dptAvg(req: any, res: { send: (arg0: string) => void }, next: any) {
+  static dptAvg(req: any, res: { send: (arg0: any) => void }, next: any) {
     const empJSON = Api.empJson(); // using the static class
     const dptObj: { [key: string]: number[] } = {}; // Add index signature to dptObj
     empJSON.map((e: { department: string | number }) => {
@@ -135,7 +135,7 @@ class Api extends Jwt {
 
   static empDpt(
     req: { query: { dpt: any } },
-    res: { send: (arg0: string) => void },
+    res: { send: (arg0: any) => void },
     next: any
   ) {
     const department = req.query.dpt;
@@ -149,7 +149,7 @@ class Api extends Jwt {
 
   static avgDptSal(
     req: { query: { dpt: any } },
-    res: { send: (arg0: string) => void }
+    res: { send: (arg0: any) => void }
   ) {
     const department = req.query.dpt;
     const jsonFilePath = path.join(__dirname, "../DATA/myFiles.json");
@@ -193,7 +193,7 @@ class Api extends Jwt {
 
   static updateAll(
     req: { body: { ids: any }; query: { salary: string } },
-    res: { send: (arg0: string) => void }
+    res: { send: (arg0: any) => void }
   ) {
     const toBeUpdatedEmployeIds = req.body.ids;
     const salary = parseInt(req.query.salary);
@@ -210,7 +210,7 @@ class Api extends Jwt {
 
   static historyData(
     req: { params: { id: string } },
-    res: { send: (arg0: string) => void },
+    res: { send: (arg0: any) => void },
     next: any
   ) {
     const id = parseInt(req.params.id);
@@ -273,13 +273,13 @@ class User extends Api {
   static login(
     req: { body: { email: any; password: any } },
     res: {
-      send: (arg0: string) => void;
+      send: (arg0: any) => void;
       status: (arg0: number) => {
         (): any;
         new (): any;
-        send: { (arg0: string): any; new (): any };
+        send: { (arg0: any): any; new (): any };
       };
-      append: (arg0: string, arg1: any) => void;
+      append: (arg0: any, arg1: any) => void;
     },
     next: any
   ) {
@@ -326,9 +326,9 @@ class User extends Api {
       status: (arg0: number) => {
         (): any;
         new (): any;
-        json: { (arg0: string): void; new (): any };
+        json: { (arg0: any): void; new (): any };
       };
-      send: (arg0: string) => void;
+      send: (arg0: any) => void;
     },
     next: any
   ) {
@@ -370,7 +370,7 @@ class User extends Api {
 
   static updateEmployee(
     req: { body: any; params: { id: string } },
-    res: { send: (arg0: string) => void },
+    res: { send: (arg0: any) => void },
     next: any
   ) {
     const updateEmployee = req.body;
@@ -518,8 +518,8 @@ class User extends Api {
 
 class Crud extends User {
   static jwtVerification(
-    req: { header: (arg0: string) => any },
-    res: { send: (arg0: string) => void },
+    req: { header: (arg0: any) => any },
+    res: { send: (arg0: any) => void },
     next: () => void
   ) {
     const token = req.header("jwt_key");
@@ -533,7 +533,7 @@ class Crud extends User {
 
   static fileExists(
     req: any,
-    res: { send: (arg0: string) => void },
+    res: { send: (arg0: any) => void },
     next: () => void
   ) {
     const fs = require("fs");
@@ -548,22 +548,22 @@ class Crud extends User {
 
   static read(
     req: { query: { name: any } },
-    res: { send: (arg0: string) => void; json: (arg0: any) => void },
+    res: { send: (arg0: any) => void; json: (arg0: any) => void },
     next: any
   ) {
     const empJSON = Api.empJson();
     const name = req.query.name;
-    const employ = empJSON.filter((elem: { name: any }) => elem.name === name);
+    const employ: empSchema[] = empJSON.filter((elem: { name: any }) => elem.name === name);
     if (employ.length === 0) res.send("employee not found");
     res.json(employ);
   }
 
   static search(
     req: { params: { id: string } },
-    res: { send: (arg0: string) => void },
+    res: { send: (arg0: any) => void },
     next: any
   ) {
-    const empJSON = Api.empJson();
+    const empJSON : empSchema[]= Api.empJson();
     const id = parseInt(req.params.id);
     const e = empJSON.find((elem: { id: number }) => elem.id === id);
     if (!e) res.send("Employee not found");
@@ -574,10 +574,10 @@ class Crud extends User {
 
   static deleteById(
     req: { params: { id: string } },
-    res: { send: (arg0: string) => void },
+    res: { send: (arg0: any) => void },
     next: any
   ) {
-    const empJSON = Api.empJson();
+    const empJSON: empSchema[]= Api.empJson();
     const id = parseInt(req.params.id);
     const index = empJSON.findIndex((elem: { id: number }) => elem.id === id);
     if (index === -1) res.send("Employee not found");
@@ -590,7 +590,7 @@ class Crud extends User {
 
   static getAll(
     req: any,
-    res: { json: (arg0: any) => void; send: (arg0: string) => void },
+    res: { json: (arg0: any) => void; send: (arg0: any) => void },
     next: any
   ) {
     const empJSON = Api.empJson();
@@ -602,7 +602,7 @@ class Crud extends User {
 
   static getPaginated(
     req: { params: { id: string } },
-    res: { json: (arg0: any) => void; send: (arg0: string) => void },
+    res: { json: (arg0: any) => void; send: (arg0: any) => void },
     next: any
   ) {
     const id = parseInt(req.params.id);
@@ -634,7 +634,7 @@ class dataVerify extends Crud {
         department: string;
       };
     },
-    res: { send: (arg0: string) => void },
+    res: { send: (arg0: any) => void },
     next: () => void
   ) {
     const { name, age, email, password, salary, position, department } =
@@ -656,7 +656,7 @@ class dataVerify extends Crud {
 
   static passwordCheck(
     req: { body: { password: any } },
-    res: { send: (arg0: string) => void },
+    res: { send: (arg0: any) => void },
     next: () => any
   ) {
     const password = req.body.password;
@@ -691,8 +691,8 @@ class dataVerify extends Crud {
   }
 
   static nameCheck(
-    req: { body: { name: any } },
-    res: { send: (arg0: string) => void },
+    req: { body: { name: string } },
+    res: { send: (arg0: any) => void },
     next: () => any
   ) {
     const name = req.body.name;
@@ -707,8 +707,8 @@ class dataVerify extends Crud {
   }
 
   static ageCheck(
-    req: { body: { age: any } },
-    res: { send: (arg0: string) => void },
+    req: { body: { age: number } },
+    res: { send: (arg0: any) => void },
     next: () => any
   ) {
     const age = req.body.age;
@@ -723,8 +723,8 @@ class dataVerify extends Crud {
   }
 
   static dptCheck(
-    req: { body: { department: string } },
-    res: { send: (arg0: string) => void },
+    req: { body: { department: dptSchema } },
+    res: { send: (arg0: any) => void },
     next: () => any
   ) {
     const department: string = req.body.department;
@@ -743,8 +743,8 @@ class dataVerify extends Crud {
   }
 
   static positionCheck(
-    req: { body: { position: any } },
-    res: { send: (arg0: string) => void },
+    req: { body: { position: string } },
+    res: { send: (arg0: any) => void },
     next: () => any
   ) {
     const position = req.body.position;
@@ -759,8 +759,8 @@ class dataVerify extends Crud {
   }
 
   static performanceVerify(
-    req: { body: { performance: any } },
-    res: { send: (arg0: string) => void },
+    req: { body: { performance: string|number } },
+    res: { send: (arg0: any) => void },
     next: () => any
   ) {
     const performance = req.body.performance;

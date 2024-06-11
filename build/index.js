@@ -15,7 +15,7 @@ const port = 3000;
 // const empJSON = require(jsonFilePath)
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.get("/", (res) => {
+app.get("/", (req, res) => {
     res.json("Homee");
 });
 //top three

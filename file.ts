@@ -20,4 +20,4 @@ const car: { type: string; model: string; year: number } = {
 
 let employee :[string,string,number?] =['skills','Job']
 
-console.log(employee[2]);
+console.log(employee[1]);

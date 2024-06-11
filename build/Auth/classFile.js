@@ -33,7 +33,7 @@ class Jwt {
 //Class related to API calls
 class Api extends Jwt {
     //Getting the Top Three Elements
-    static topThree(req, res, next) {
+    static topThree(res) {
         const empJSON = Api.empJson(); // using the static class
         let count = 0;
         empJSON.sort((a, b) => b.salary - a.salary);

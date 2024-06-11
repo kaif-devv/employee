@@ -1,12 +1,12 @@
 const express = require("express");
-const readRoute = require("./CRUD/Read.ts");
-const createRoute = require("./CRUD/Create.ts");
-const deleteRoute = require("./CRUD/Delete.ts");
-const updateRoute = require("./CRUD/Update.ts");
-const searchRoute = require("./CRUD/Search.ts");
-const loginRoute = require("./CRUD/Login.ts");
-const topThreeEmp = require("./CRUD/API/topThree.ts")
-const allRoute = require("./CRUD/All.ts");
+const readRoute = require("./CRUD/Read");
+const createRoute = require("./CRUD/Create");
+const deleteRoute = require("./CRUD/Delete");
+const updateRoute = require("./CRUD/Update");
+const searchRoute = require("./CRUD/Search");
+const loginRoute = require("./CRUD/Login");
+const topThreeEmp = require("./CRUD/API/topThree")
+const allRoute = require("./CRUD/All");
 
 const app = express()
 const port = 3000;
@@ -18,7 +18,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.get("/", (req:any, res:any) => {
-  res.json("Home");
+  res.json("Homee");
 });
 
 //top three

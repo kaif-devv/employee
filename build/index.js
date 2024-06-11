@@ -1,22 +1,22 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const express = require("express");
-const readRoute = require("./CRUD/Read.js");
-const createRoute = require("./CRUD/Create.js");
-const deleteRoute = require("./CRUD/Delete.js");
-const updateRoute = require("./CRUD/Update.js");
-const searchRoute = require("./CRUD/Search.js");
-const loginRoute = require("./CRUD/Login.js");
-const topThreeEmp = require("./CRUD/API/topThree.js");
-const allRoute = require("./CRUD/All.js");
+const readRoute = require("./CRUD/Read");
+const createRoute = require("./CRUD/Create");
+const deleteRoute = require("./CRUD/Delete");
+const updateRoute = require("./CRUD/Update");
+const searchRoute = require("./CRUD/Search");
+const loginRoute = require("./CRUD/Login");
+const topThreeEmp = require("./CRUD/API/topThree");
+const allRoute = require("./CRUD/All");
 const app = express();
 const port = 3000;
 // const jsonFilePath = path.join(__dirname, "./DATA/myFiles.json");
 // const empJSON = require(jsonFilePath)
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.get("/", (req, res) => {
-    res.json("Home");
+app.get("/", (res) => {
+    res.json("Homee");
 });
 //top three
 app.use(topThreeEmp);

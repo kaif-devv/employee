@@ -16,6 +16,7 @@ type empSchema = {
   department: string;
   performance: string;
 };
+type dptSchema= 'frontend'|'backend'|'fullstack';
 
 //Class related to JWT Operations
 class Jwt {
@@ -37,7 +38,7 @@ class Jwt {
 
 class Api extends Jwt {
   //Getting the Top Three Elements
-  static topThree(req: any, res: { json: (arg0: any) => void }, next: any) {
+  static topThree( res: { json: (arg0: any) => void }) {
     const empJSON: empSchema[] = Api.empJson(); // using the static class
     let count = 0;
     empJSON.sort(
@@ -624,13 +625,13 @@ class dataVerify extends Crud {
   static fieldsVerify(
     req: {
       body: {
-        name: any;
-        age: any;
-        email: any;
+        name: string;
+        age: number;
+        email: string;
         password: any;
-        salary: any;
-        position: any;
-        department: any;
+        salary: number;
+        position: string;
+        department: string;
       };
     },
     res: { send: (arg0: string) => void },
@@ -722,11 +723,11 @@ class dataVerify extends Crud {
   }
 
   static dptCheck(
-    req: { body: { department: any } },
+    req: { body: { department: string } },
     res: { send: (arg0: string) => void },
     next: () => any
   ) {
-    const department = req.body.department;
+    const department: string = req.body.department;
     if (!department) {
       return next();
     }

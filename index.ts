@@ -8,7 +8,7 @@ const loginRoute = require("./CRUD/Login.ts");
 const topThreeEmp = require("./CRUD/API/topThree.ts")
 const allRoute = require("./CRUD/All.ts");
 
-const app = express();
+const app = express()
 const port = 3000;
 
 // const jsonFilePath = path.join(__dirname, "./DATA/myFiles.json");
@@ -17,7 +17,7 @@ const port = 3000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.get("/", (req, res) => {
+app.get("/", (req:any, res:any) => {
   res.json("Home");
 });
 

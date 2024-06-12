@@ -4,6 +4,7 @@ dotenv.config();
 const path = require("path");
 const fs = require("fs");
 const bcrypt = require("bcrypt");
+import { Response, Request } from "express";
 
 type empSchema = {
   id: number;
@@ -15,19 +16,75 @@ type empSchema = {
   password: string;
   department: string;
   performance: string;
+  joinDate?: string;
+  prevpassword?: any;
 };
-type dptSchema= 'frontend'|'backend'|'fullstack';
+
+type updateSchema = {
+  id?: number;
+  name?: string;
+  age?: number;
+  email?: string;
+  position?: string;
+  salary?: number;
+  password?: string;
+  department?: string;
+  performance?: string;
+  joinDate?: string;
+  prevPassword?: any;
+};
+
+type historySchema = {
+  id: number;
+  empHistoryId: number;
+  updatedOn: string;
+  name?: {
+    prevName: string;
+    currentName: string;
+  };
+  salary?: {
+    prevSalary: number;
+    currentSalary: number;
+  };
+  age?: {
+    prevAge: number;
+    currentAge: number;
+  };
+  department?: {
+    prevDpt: string;
+    currentDpt: string;
+  };
+  position?: {
+    prevPosition: string;
+    currentPosition: string;
+  };
+  performance?: {
+    prevPerformance: string | number;
+    currentPerformance: string | number;
+  };
+  email?: {
+    prevEmail: string;
+    currentEmail: string;
+  };
+  password?: {
+    prevpassword: any;
+    currentpassword: any;
+  };
+};
+
+type dptSchema = "frontend" | "backend" | "fullstack";
+type posSchema = "SDE1" | "SDE2" | "SDE3";
 
 //Class related to JWT Operations
 class Jwt {
   //Verifying the Token
-  static jwtVerify(token: any) {
+  static jwtVerify(token: string) {
     let jwtSecretKey = process.env.JWT_SECRET_KEY;
     const verify = jwt.verify(token, jwtSecretKey);
     return verify;
   }
   //Generating the Token
-  static generateToken(payload: { email: any; isAdmin: boolean }) {
+  static generateToken(payload: { email: string; isAdmin: boolean }) {
     let jwtSecretKey = process.env.JWT_SECRET_KEY;
     const token = jwt.sign(payload, jwtSecretKey);
     return token;
@@ -38,52 +95,57 @@ class Jwt {
 
 class Api extends Jwt {
   //Getting the Top Three Elements
-  static topThree( res: { json: (arg0: any) => void }) {
+  static topThree(req: null, res: Response) {
     const empJSON: empSchema[] = Api.empJson(); // using the static class
-    let count = 0;
-    empJSON.sort(
-      (a: { salary: number }, b: { salary: number }) => b.salary - a.salary
-    );
-    for (let i = 2; i < empJSON.length; i++) {
-      if (empJSON[i].salary === empJSON[i + 1].salary) {
-        continue;
-      } else {
-        count = i + 1;
-        break;
+    if (empJSON) {
+      let count = 0;
+      empJSON.sort(
+        (a: { salary: number }, b: { salary: number }) => b.salary - a.salary
+      );
+      for (let i = 2; i < empJSON.length; i++) {
+        if (empJSON[i].salary === empJSON[i + 1].salary) {
+          continue;
+        } else {
+          count = i + 1;
+          break;
+        }
       }
+      let arr = empJSON.slice(0, count);
+      res.send(arr);
+    } else {
+      res.send("Data doesn't exists");
     }
-    res.json(empJSON.slice(0, count));
   }
 
   static empJson() {
     const jsonFilePath = path.join(__dirname, "../DATA/myFiles.json");
-    const empJSON = require(jsonFilePath);
-    if (empJSON) return empJSON;
-    else return false;
+    const empJSON: empSchema[] = require(jsonFilePath);
+    return empJSON;
   }
 
-  static performance(
-    req: { query: { performance: any } },
-    res: { send: (arg0: any) => void },
-    next: any
-  ) {
+  static performance(req: Request, res: Response, next: any) {
     const performance = req.query.performance;
-    const empJSON = Api.empJson(); // using the static class
-    const arr = empJSON.filter(
-      (elem: { performance: number }) => elem.performance >= performance
-    );
-    if (arr.length === 0) res.send("No Employees with that performance range ");
-    else res.send(arr);
+    if (performance) {
+      const empJSON: empSchema[] = Api.empJson(); // using the static class
+      const arr: empSchema[] = empJSON.filter(
+        (elem: { performance: any }) => elem.performance >= performance
+      );
+      if (arr.length === 0)
+        res.send("No Employees with that performance range ");
+      else res.send(arr);
+    } else {
+      res.send("Empty response sent");
+    }
   }
 
-  static getAverage(req: any, res: { send: (arg0: any) => void }) {
+  static getAverage(req: null, res: Response) {
     let total = 0;
-    const empJSON = Api.empJson(); // using the static class
-    let div = empJSON.length;
+    const empJSON: empSchema[] = Api.empJson(); // using the static class
+    let div: number = empJSON.length;
     empJSON.map((elem: { salary: number }) => {
       total += elem.salary;
     });
-    let avg = total / div;
+    let avg: number = total / div;
     res.send(
       "the average and Total Salary of " +
         empJSON.length +
@@ -95,14 +157,14 @@ class Api extends Jwt {
   }
 
   static dptCount(
-    req: { query: { dpt: any } },
-    res: { send: (arg0: any) => void },
+    req: { query: { dpt: dptSchema } },
+    res: { send: (arg0: string) => void },
     next: any
   ) {
-    const department = req.query.dpt;
-    const empJSON = Api.empJson(); // using the static class
-    const arr = empJSON.filter(
-      (elem: { department: any }) => elem.department === department
+    const department: dptSchema = req.query.dpt;
+    const empJSON: empSchema[] = Api.empJson(); // using the static class
+    const arr: empSchema[] = empJSON.filter(
+      (elem: { department: string }) => elem.department === department
     );
     if (arr.length === 0) res.send("No Employees in the department ");
     else
@@ -111,57 +173,50 @@ class Api extends Jwt {
       );
   }
 
-  static dptAvg(req: any, res: { send: (arg0: any) => void }, next: any) {
+  static dptAvg(req: null, res: Response, next: any) {
     const empJSON = Api.empJson(); // using the static class
     const dptObj: { [key: string]: number[] } = {}; // Add index signature to dptObj
-    empJSON.map((e: { department: string | number }) => {
+    empJSON.map((e: { department: string }) => {
       dptObj[e.department] = [];
     });
-    empJSON.map((e: { department: string | number; salary: any }) => {
+    empJSON.map((e: { department: string; salary: number }) => {
       dptObj[e.department].push(e.salary);
     });
-    let responseString = "";
+    let responseString: string = "";
     Object.keys(dptObj).forEach((key) => {
-      const salaries = dptObj[key];
+      const salaries: number[] = dptObj[key];
       let sum = 0;
       for (let i = 0; i < salaries.length; i++) {
         sum += salaries[i];
       }
-      let avg = sum / salaries.length;
+      let avg: number = sum / salaries.length;
       responseString += `The average sal of the department ${key} is ${avg}\n`;
     });
     res.send(responseString);
   }
 
-  static empDpt(
-    req: { query: { dpt: any } },
-    res: { send: (arg0: any) => void },
-    next: any
-  ) {
-    const department = req.query.dpt;
-    const empJSON = Api.empJson(); // using the static class
-    const arr = empJSON.filter(
-      (elem: { department: any }) => elem.department === department
+  static empDpt(req: { query: { dpt: dptSchema } }, res: Response, next: any) {
+    const department: dptSchema = req.query.dpt;
+    const empJSON: empSchema[] = Api.empJson(); // using the static class
+    const arr: empSchema[] = empJSON.filter(
+      (elem: { department: string }) => elem.department === department
     );
     if (arr.length === 0) res.send("No Employees in the department ");
     else res.send(arr);
   }
 
-  static avgDptSal(
-    req: { query: { dpt: any } },
-    res: { send: (arg0: any) => void }
-  ) {
-    const department = req.query.dpt;
-    const jsonFilePath = path.join(__dirname, "../DATA/myFiles.json");
-    const empJSON = require(jsonFilePath);
+  static avgDptSal(req: { query: { dpt: dptSchema } }, res: Response) {
+    const department: dptSchema = req.query.dpt;
+    const jsonFilePath: string = path.join(__dirname, "../DATA/myFiles.json");
+    const empJSON: empSchema[] = require(jsonFilePath);
     const arr = empJSON.filter(
       (elem: { department: any }) => elem.department === department
     );
     arr.sort(
       (a: { salary: number }, b: { salary: number }) => b.salary - a.salary
     );
-    let maxSal = arr[0].salary;
-    let minSal = arr[arr.length - 1].salary;
+    let maxSal: number = arr[0].salary;
+    let minSal: number = arr[arr.length - 1].salary;
     res.send(
       `The max and min salary of department ${department} is ${maxSal} and ${minSal}`
     );
@@ -181,27 +236,29 @@ class Api extends Jwt {
     }
   }
   static sortParam(
-    req: { query: { field: any }; params: { id: string } },
-    res: { json: (arg0: any) => void }
+    req: { query: { field: string }; params: { id: string } },
+    res: Response
   ) {
-    const field = req.query.field;
-    const order = parseInt(req.params.id);
-    const empJSON = Api.empJson(); // using the static class
+    const field: string = req.query.field;
+    const order: number = parseInt(req.params.id);
+    const empJSON: empSchema[] = Api.empJson(); // using the static class
     Api.sortBy(empJSON, order, field); //sorting function
     res.json(empJSON);
   }
 
   static updateAll(
-    req: { body: { ids: any }; query: { salary: string } },
-    res: { send: (arg0: any) => void }
+    req: { body: { ids: number[] }; query: { salary: string } },
+    res: Response
   ) {
-    const toBeUpdatedEmployeIds = req.body.ids;
-    const salary = parseInt(req.query.salary);
+    const toBeUpdatedEmployeIds: number[] = req.body.ids;
+    const salary: number = parseInt(req.query.salary);
     //toBeUpdatedEmployeIds is an array of multiple ids which we have to update the salary
-    const jsonFilePath = path.join(__dirname, "../DATA/myFiles.json");
-    const empJSON = require(jsonFilePath);
+    const jsonFilePath: string = path.join(__dirname, "../DATA/myFiles.json");
+    const empJSON: empSchema[] = require(jsonFilePath);
     toBeUpdatedEmployeIds.map((id: any) => {
-      const index = empJSON.findIndex((elem: { id: any }) => elem.id === id);
+      const index: number = empJSON.findIndex(
+        (elem: { id: any }) => elem.id === id
+      );
       empJSON[index].salary = salary;
     });
     fs.writeFileSync(jsonFilePath, JSON.stringify(empJSON));
@@ -210,16 +267,21 @@ class Api extends Jwt {
 
   static historyData(
     req: { params: { id: string } },
-    res: { send: (arg0: any) => void },
+    res: Response,
     next: any
   ) {
-    const id = parseInt(req.params.id);
-    const empJSON = Api.empJson(); // using the static class
-    const index = empJSON.findIndex((elem: { id: number }) => elem.id === id);
+    const id: number = parseInt(req.params.id);
+    const empJSON: empSchema[] = Api.empJson(); // using the static class
+    const index: number = empJSON.findIndex(
+      (elem: { id: number }) => elem.id === id
+    );
     if (index === -1) {
       res.send("Employee not found");
     }
-    const historyFilePath = path.join(__dirname, "../DATA/history.json");
+    const historyFilePath: string = path.join(
+      __dirname,
+      "../DATA/history.json"
+    );
     const historyJSON = require(historyFilePath);
     let filteredEmployees = historyJSON.filter(
       (elem: { id: number }) => elem.id === id
@@ -234,8 +296,8 @@ class Api extends Jwt {
 
   static report(req: any, res: { download: (arg0: any) => void }, next: any) {
     var csvJSON = require("csvjson");
-    let downloadPath = path.join(__dirname, "../DATA/report.csv");
-    const empJSON = Api.empJson(); // using the static class
+    let downloadPath: string = path.join(__dirname, "../DATA/report.csv");
+    const empJSON: empSchema[] = Api.empJson(); // using the static class
     const dptObj: { [key: string]: number[] } = {};
     empJSON.map((e: { department: string | number }) => {
       dptObj[e.department] = [];
@@ -249,7 +311,7 @@ class Api extends Jwt {
       averageSal: number;
     }[] = [];
     Object.keys(dptObj).forEach((key) => {
-      const salaries = dptObj[key];
+      const salaries: number[] = dptObj[key];
       let sum = 0;
       for (let i = 0; i < salaries.length; i++) {
         sum += salaries[i];
@@ -271,27 +333,32 @@ class Api extends Jwt {
 
 class User extends Api {
   static login(
-    req: { body: { email: any; password: any } },
+    req: { body: { email: string; password: any } },
     res: {
-      send: (arg0: any) => void;
+      send: (arg0: string) => void;
       status: (arg0: number) => {
         (): any;
         new (): any;
         send: { (arg0: any): any; new (): any };
       };
-      append: (arg0: any, arg1: any) => void;
+      append: (arg0: string, arg1: string) => void;
     },
     next: any
   ) {
     const bcrypt = require("bcrypt");
     const empJSON = Api.empJson();
     const { email, password } = req.body;
-    const employee = empJSON.find((ele: { email: any }) => ele.email === email);
-    if (!employee) res.send("Invalid Credentials or Employee doesn't exist");
+    const employee = empJSON.find(
+      (ele: { email: string }) => ele.email === email
+    );
+    if (!employee) {
+      res.send("Invalid Credentials or Employee doesn't exist");
+      return;
+    }
     bcrypt.compare(
       password,
       employee.password,
-      async (err: any, result: any) => {
+      async (err: Error, result: boolean) => {
         if (err) {
           console.error(err);
           return res.status(500).send("Internal Server Error");
@@ -299,11 +366,14 @@ class User extends Api {
         if (!result) {
           return res.send("Your password is incorrect");
         }
-        const payload = {
+        const payload: {
+          email: string;
+          isAdmin: boolean;
+        } = {
           email: email,
           isAdmin: true,
         };
-        const token = Jwt.generateToken(payload); // Generated Token by jwt static generate method
+        const token: string = Jwt.generateToken(payload); // Generated Token by jwt static generate method
         res.append("jwt_key", token);
         res.send("Login successful , token generated is " + token);
       }
@@ -313,13 +383,13 @@ class User extends Api {
   static createEmployee(
     req: {
       body: {
-        name: any;
-        age: any;
-        email: any;
-        password: any;
-        position: any;
-        salary: any;
-        department: any;
+        name: string;
+        age: number;
+        email: string;
+        password: string;
+        position: string;
+        salary: number;
+        department: string;
       };
     },
     res: {
@@ -338,16 +408,16 @@ class User extends Api {
     if (!fs.existsSync(jsonFilePath)) {
       fs.writeFileSync(jsonFilePath, "[]");
     }
-    const empJSON = Api.empJson();
-    const updatedId =
+    const empJSON: empSchema[] = Api.empJson();
+    const updatedId: number =
       empJSON.length > 0 ? empJSON[empJSON.length - 1].id + 1 : 1;
-    const index = empJSON.findIndex(
-      (elem: { email: any }) => elem.email === email
+    const index: number = empJSON.findIndex(
+      (elem: { email: string }) => elem.email === email
     );
     if (index === -1) {
       bcrypt.hash(password, 5, async function (err: any, hash: any) {
         let d = Date.now().toString().slice(4, 33);
-        const newEmployee = {
+        const newEmployee: empSchema = {
           name,
           age,
           email,
@@ -357,7 +427,7 @@ class User extends Api {
           password: hash,
           department,
           joinDate: d,
-          performance: 3,
+          performance: "3",
         };
         empJSON.push(newEmployee);
         fs.writeFileSync(jsonFilePath, JSON.stringify(empJSON));
@@ -370,58 +440,22 @@ class User extends Api {
 
   static updateEmployee(
     req: { body: any; params: { id: string } },
-    res: { send: (arg0: any) => void },
+    res: Response,
     next: any
   ) {
-    const updateEmployee = req.body;
+    const updateEmployee: updateSchema = req.body;
     const prevPassword = updateEmployee.prevPassword;
-    const id = parseInt(req.params.id);
+    const id: number = parseInt(req.params.id);
 
-    const historyPath = path.join(__dirname, "../DATA/history.json");
-    const jsonFilePath = path.join(__dirname, "../DATA/myfiles.json");
+    const historyPath: string = path.join(__dirname, "../DATA/history.json");
+    const jsonFilePath: string = path.join(__dirname, "../DATA/myfiles.json");
 
     const empHistory = require(historyPath);
-    const empHistoryId =
+    const empHistoryId: number =
       empHistory.length > 0
         ? empHistory[empHistory.length - 1].empHistoryId + 1
         : 1;
-    const updatedOBJ: {
-      id: number;
-      empHistoryId: any;
-      updatedOn: string;
-      name?: {
-        prevName: string;
-        currentName: string;
-      };
-      salary?: {
-        prevSalary: string | number;
-        currentSalary: string | number;
-      };
-      age?: {
-        prevAge: string | number;
-        currentAge: string | number;
-      };
-      department?: {
-        prevDpt: string;
-        currentDpt: string;
-      };
-      position?: {
-        prevPosition: string;
-        currentPosition: string;
-      };
-      performance?: {
-        prevPerformance: string | number;
-        currentPerformance: string | number;
-      };
-      email?: {
-        prevEmail: string;
-        currentEmail: string;
-      };
-      password?: {
-        prevpassword: any;
-        currentpassword: any;
-      };
-    } = {
+    const updatedOBJ: historySchema = {
       id: id,
       empHistoryId: empHistoryId,
       updatedOn: Date.now().toString().slice(4, 33),
@@ -518,11 +552,11 @@ class User extends Api {
 
 class Crud extends User {
   static jwtVerification(
-    req: { header: (arg0: any) => any },
-    res: { send: (arg0: any) => void },
+    req: { header: (arg0: string) => string },
+    res: Response,
     next: () => void
   ) {
-    const token = req.header("jwt_key");
+    const token: string = req.header("jwt_key");
     try {
       Jwt.jwtVerify(token);
       next();
@@ -533,12 +567,12 @@ class Crud extends User {
 
   static fileExists(
     req: any,
-    res: { send: (arg0: any) => void },
+    res: { send: (arg0: string) => void },
     next: () => void
   ) {
     const fs = require("fs");
     const path = require("path");
-    const jsonFilePath = path.join(__dirname, "../DATA/myFiles.json");
+    const jsonFilePath: string = path.join(__dirname, "../DATA/myFiles.json");
     if (!fs.existsSync(jsonFilePath)) {
       res.send("Data doesn't exists");
     } else {
@@ -547,24 +581,26 @@ class Crud extends User {
   }
 
   static read(
-    req: { query: { name: any } },
-    res: { send: (arg0: any) => void; json: (arg0: any) => void },
+    req: { query: { name: string } },
+    res: { send: (arg0: string) => void; json: (arg0: {}[]) => void },
     next: any
   ) {
-    const empJSON = Api.empJson();
-    const name = req.query.name;
-    const employ: empSchema[] = empJSON.filter((elem: { name: any }) => elem.name === name);
+    const empJSON: empSchema[] = Api.empJson();
+    const name: string = req.query.name;
+    const employ: empSchema[] = empJSON.filter(
+      (elem: { name: string }) => elem.name === name
+    );
     if (employ.length === 0) res.send("employee not found");
     res.json(employ);
   }
 
   static search(
     req: { params: { id: string } },
-    res: { send: (arg0: any) => void },
+    res: { send: (arg0: {}) => void },
     next: any
   ) {
-    const empJSON : empSchema[]= Api.empJson();
-    const id = parseInt(req.params.id);
+    const empJSON: empSchema[] = Api.empJson();
+    const id: number = parseInt(req.params.id);
     const e = empJSON.find((elem: { id: number }) => elem.id === id);
     if (!e) res.send("Employee not found");
     else {
@@ -574,12 +610,14 @@ class Crud extends User {
 
   static deleteById(
     req: { params: { id: string } },
-    res: { send: (arg0: any) => void },
+    res: { send: (arg0: string) => void },
     next: any
   ) {
-    const empJSON: empSchema[]= Api.empJson();
-    const id = parseInt(req.params.id);
-    const index = empJSON.findIndex((elem: { id: number }) => elem.id === id);
+    const empJSON: empSchema[] = Api.empJson();
+    const id: number = parseInt(req.params.id);
+    const index: number = empJSON.findIndex(
+      (elem: { id: number }) => elem.id === id
+    );
     if (index === -1) res.send("Employee not found");
     else {
       empJSON.splice(index, 1);
@@ -590,10 +628,10 @@ class Crud extends User {
 
   static getAll(
     req: any,
-    res: { json: (arg0: any) => void; send: (arg0: any) => void },
+    res: { json: (arg0: {}) => void; send: (arg0: string) => void },
     next: any
   ) {
-    const empJSON = Api.empJson();
+    const empJSON: empSchema[] = Api.empJson();
     if (empJSON) res.json(empJSON);
     else {
       res.send("Employee list empty");
@@ -602,16 +640,16 @@ class Crud extends User {
 
   static getPaginated(
     req: { params: { id: string } },
-    res: { json: (arg0: any) => void; send: (arg0: any) => void },
+    res: { json: (arg0: {}) => void; send: (arg0: string) => void },
     next: any
   ) {
-    const id = parseInt(req.params.id);
-    const empJSON = Api.empJson();
+    const id: number = parseInt(req.params.id);
+    const empJSON: empSchema[] = Api.empJson();
     if (empJSON) {
       //pagination for 4 employees
-      const start = (id - 1) * 4;
-      const end = id * 4;
-      const result = empJSON.slice(start, end);
+      const start: number = (id - 1) * 4;
+      const end: number = id * 4;
+      const result: empSchema[] = empJSON.slice(start, end);
       res.json(result);
     } else {
       res.send("Employee list empty");
@@ -634,7 +672,7 @@ class dataVerify extends Crud {
         department: string;
       };
     },
-    res: { send: (arg0: any) => void },
+    res: { send: (arg0: string) => void },
     next: () => void
   ) {
     const { name, age, email, password, salary, position, department } =
@@ -656,21 +694,21 @@ class dataVerify extends Crud {
 
   static passwordCheck(
     req: { body: { password: any } },
-    res: { send: (arg0: any) => void },
+    res: { send: (arg0: string) => void },
     next: () => any
   ) {
-    const password = req.body.password;
+    const password: any = req.body.password;
     if (!password) {
       return next();
     }
-    const specialCharRegex = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
-    let capitalFlag = false;
-    let numFlag = false;
-    let smallFlag = false;
-    let specialFlag = false;
+    const specialCharRegex: any = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
+    let capitalFlag: boolean = false;
+    let numFlag: boolean = false;
+    let smallFlag: boolean = false;
+    let specialFlag: boolean = false;
 
     for (let i = 0; i < password.length; i++) {
-      const char = password[i];
+      const char: string = password[i];
       if (/[A-Z]/.test(char)) {
         capitalFlag = true;
       } else if (/[a-z]/.test(char)) {
@@ -692,10 +730,10 @@ class dataVerify extends Crud {
 
   static nameCheck(
     req: { body: { name: string } },
-    res: { send: (arg0: any) => void },
+    res: { send: (arg0: string) => void },
     next: () => any
   ) {
-    const name = req.body.name;
+    const name: string = req.body.name;
     if (!name) {
       return next();
     }
@@ -708,10 +746,10 @@ class dataVerify extends Crud {
 
   static ageCheck(
     req: { body: { age: number } },
-    res: { send: (arg0: any) => void },
+    res: { send: (arg0: string) => void },
     next: () => any
   ) {
-    const age = req.body.age;
+    const age: number = req.body.age;
     if (!age) {
       return next();
     }
@@ -724,7 +762,7 @@ class dataVerify extends Crud {
 
   static dptCheck(
     req: { body: { department: dptSchema } },
-    res: { send: (arg0: any) => void },
+    res: { send: (arg0: string) => void },
     next: () => any
   ) {
     const department: string = req.body.department;
@@ -743,11 +781,11 @@ class dataVerify extends Crud {
   }
 
   static positionCheck(
-    req: { body: { position: string } },
-    res: { send: (arg0: any) => void },
+    req: { body: { position: posSchema } },
+    res: { send: (arg0: string) => void },
     next: () => any
   ) {
-    const position = req.body.position;
+    const position: posSchema = req.body.position;
     if (!position) {
       return next();
     }
@@ -759,11 +797,11 @@ class dataVerify extends Crud {
   }
 
   static performanceVerify(
-    req: { body: { performance: string|number } },
-    res: { send: (arg0: any) => void },
+    req: { body: { performance: string } },
+    res: { send: (arg0: string) => void },
     next: () => any
   ) {
-    const performance = req.body.performance;
+    const performance: string = req.body.performance;
     if (!performance) {
       return next();
     }

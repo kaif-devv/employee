@@ -18,6 +18,9 @@ const car: { type: string; model: string; year: number } = {
   year: 4,
 };
 
-let employee :[string,string,number?] =['skills','Job']
+let employee: [string, string, number?] = ["skills", "Job"];
 
 console.log(employee[1]);
+
+const arr: number[] = [1, 2, 3];
+const a: { [key: string]: number|string } = { kaif: 1 , ksit:5, "5": "5"};

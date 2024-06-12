@@ -33,37 +33,45 @@ class Jwt {
 //Class related to API calls
 class Api extends Jwt {
     //Getting the Top Three Elements
-    static topThree(res) {
+    static topThree(req, res) {
         const empJSON = Api.empJson(); // using the static class
-        let count = 0;
-        empJSON.sort((a, b) => b.salary - a.salary);
-        for (let i = 2; i < empJSON.length; i++) {
-            if (empJSON[i].salary === empJSON[i + 1].salary) {
-                continue;
+        if (empJSON) {
+            let count = 0;
+            empJSON.sort((a, b) => b.salary - a.salary);
+            for (let i = 2; i < empJSON.length; i++) {
+                if (empJSON[i].salary === empJSON[i + 1].salary) {
+                    continue;
+                }
+                else {
+                    count = i + 1;
+                    break;
+                }
             }
-            else {
-                count = i + 1;
-                break;
-            }
+            let arr = empJSON.slice(0, count);
+            res.send(arr);
         }
-        res.json(empJSON.slice(0, count));
+        else {
+            res.send("Data doesn't exists");
+        }
     }
     static empJson() {
         const jsonFilePath = path.join(__dirname, "../DATA/myFiles.json");
         const empJSON = require(jsonFilePath);
-        if (empJSON)
-            return empJSON;
-        else
-            return false;
+        return empJSON;
     }
     static performance(req, res, next) {
         const performance = req.query.performance;
-        const empJSON = Api.empJson(); // using the static class
-        const arr = empJSON.filter((elem) => elem.performance >= performance);
-        if (arr.length === 0)
-            res.send("No Employees with that performance range ");
-        else
-            res.send(arr);
+        if (performance) {
+            const empJSON = Api.empJson(); // using the static class
+            const arr = empJSON.filter((elem) => elem.performance >= performance);
+            if (arr.length === 0)
+                res.send("No Employees with that performance range ");
+            else
+                res.send(arr);
+        }
+        else {
+            res.send("Empty response sent");
+        }
     }
     static getAverage(req, res) {
         let total = 0;
@@ -207,8 +215,10 @@ class User extends Api {
         const empJSON = Api.empJson();
         const { email, password } = req.body;
         const employee = empJSON.find((ele) => ele.email === email);
-        if (!employee)
+        if (!employee) {
             res.send("Invalid Credentials or Employee doesn't exist");
+            return;
+        }
         bcrypt.compare(password, employee.password, (err, result) => __awaiter(this, void 0, void 0, function* () {
             if (err) {
                 console.error(err);
@@ -249,7 +259,7 @@ class User extends Api {
                         password: hash,
                         department,
                         joinDate: d,
-                        performance: 3,
+                        performance: "3",
                     };
                     empJSON.push(newEmployee);
                     fs.writeFileSync(jsonFilePath, JSON.stringify(empJSON));

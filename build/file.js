@@ -12,5 +12,7 @@ const car = {
     model: "Corolla",
     year: 4,
 };
-let employee = ['skills', 'Job'];
+let employee = ["skills", "Job"];
 console.log(employee[1]);
+const arr = [1, 2, 3];
+const a = { kaif: 1, ksit: 5, "5": "5" };

@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express();
-const {Crud} = require('../Auth/classFile');
+const {Crud} = require('../Auth/CrudClass');
 
 //Display all employees
 router.get("/all", Crud.fileExists, Crud.jwtVerification,Crud.getAll);

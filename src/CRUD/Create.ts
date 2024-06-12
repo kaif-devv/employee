@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express();
-const {dataVerify,User} = require('../Auth/classFile')
+const {dataVerify} = require('../Auth/DataVerifyClass')
+const {User} = require('../Auth/userClass')
+
 router.post(
   "/create",
   dataVerify.fieldsVerify,

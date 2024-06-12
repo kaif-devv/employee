@@ -5,75 +5,7 @@ const path = require("path");
 const fs = require("fs");
 const bcrypt = require("bcrypt");
 import { Response, Request } from "express";
-
-type empSchema = {
-  id: number;
-  name: string;
-  age: number;
-  email: string;
-  position: string;
-  salary: number;
-  password: string;
-  department: string;
-  performance: string;
-  joinDate?: string;
-  prevpassword?: any;
-};
-
-type updateSchema = {
-  id?: number;
-  name?: string;
-  age?: number;
-  email?: string;
-  position?: string;
-  salary?: number;
-  password?: string;
-  department?: string;
-  performance?: string;
-  joinDate?: string;
-  prevPassword?: any;
-};
-
-type historySchema = {
-  id: number;
-  empHistoryId: number;
-  updatedOn: string;
-  name?: {
-    prevName: string;
-    currentName: string;
-  };
-  salary?: {
-    prevSalary: number;
-    currentSalary: number;
-  };
-  age?: {
-    prevAge: number;
-    currentAge: number;
-  };
-  department?: {
-    prevDpt: string;
-    currentDpt: string;
-  };
-  position?: {
-    prevPosition: string;
-    currentPosition: string;
-  };
-  performance?: {
-    prevPerformance: string | number;
-    currentPerformance: string | number;
-  };
-  email?: {
-    prevEmail: string;
-    currentEmail: string;
-  };
-  password?: {
-    prevpassword: any;
-    currentpassword: any;
-  };
-};
-
-type dptSchema = "frontend" | "backend" | "fullstack";
-type posSchema = "SDE1" | "SDE2" | "SDE3";
+import { empSchema, updateSchema, historySchema,dptSchema,posSchema } from "./schemas";
 
 //Class related to JWT Operations
 class Jwt {
@@ -287,6 +219,7 @@ class Api extends Jwt {
       (elem: { id: number }) => elem.id === id
     );
     let vari = filteredEmployees[filteredEmployees.length - 1];
+
     res.send(
       `The employee update history of the employee \n ${JSON.stringify(
         empJSON[index]
@@ -813,4 +746,4 @@ class dataVerify extends Crud {
   }
 }
 
-module.exports = { Jwt, Api, User, Crud, dataVerify };
+// module.exports = { Jwt, Api, User, Crud, dataVerify };

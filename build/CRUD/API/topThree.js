@@ -2,7 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const express = require("express");
 const router = express();
-const { Api, Crud } = require("../../Auth/classFile");
+const { Api } = require("../../Auth/apiClass");
+const { Crud } = require("../../Auth/CrudClass");
 //Top three employees with high salary
 router.get("/topThree", Crud.fileExists, Api.topThree);
 //Average and total salary of all employees

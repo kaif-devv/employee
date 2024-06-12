@@ -1,7 +1,9 @@
 const express = require("express");
 const router = express();
 
-const { Api,Crud } = require("../../Auth/classFile");
+const { Api } = require("../../Auth/apiClass");
+const { Crud } = require("../../Auth/CrudClass");
+
 
 //Top three employees with high salary
 

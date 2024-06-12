@@ -560,4 +560,4 @@ class dataVerify extends Crud {
         }
     }
 }
-module.exports = { Jwt, Api, User, Crud, dataVerify };
+// module.exports = { Jwt, Api, User, Crud, dataVerify };

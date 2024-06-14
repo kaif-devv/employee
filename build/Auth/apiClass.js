@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const { Jwt } = require('./jwtClass');
-const fs = require('fs');
-const path = require('path');
+const { Jwt } = require("./jwtClass");
+const fs = require("fs");
+const path = require("path");
 class Api extends Jwt {
     //Getting the Top Three Elements
     static topThree(req, res) {
@@ -148,7 +148,12 @@ class Api extends Jwt {
         const historyJSON = require(historyFilePath);
         let filteredEmployees = historyJSON.filter((elem) => elem.id === id);
         let vari = filteredEmployees[filteredEmployees.length - 1];
-        res.send(`The employee update history of the employee \n ${JSON.stringify(empJSON[index])} \n is \n ${JSON.stringify(vari)}`);
+        if (vari) {
+            res.send(`The employee update history of the employee \n ${JSON.stringify(empJSON[index])} \n is \n ${JSON.stringify(vari)}`);
+        }
+        else {
+            res.send(`This Employee of name: ${empJSON[index].name} and id: ${id} has no update history`);
+        }
     }
     static report(req, res, next) {
         var csvJSON = require("csvjson");

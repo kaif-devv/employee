@@ -1,6 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const { Jwt, User, Api } = require("./userClass");
+const { Jwt } = require("./jwtClass");
+const { User } = require("./userClass");
+const { Api } = require("./apiClass");
 const fs = require("fs");
 class Crud extends User {
     static jwtVerification(req, res, next) {

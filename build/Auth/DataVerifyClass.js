@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const { Crud } = require('./CrudClass');
+const { Crud } = require("./CrudClass");
 class dataVerify extends Crud {
     static fieldsVerify(req, res, next) {
         const { name, age, email, password, salary, position, department } = req.body;

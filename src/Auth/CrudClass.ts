@@ -1,9 +1,10 @@
-const { Jwt, User, Api } = require("./userClass");
+const { Jwt } = require("./jwtClass");
+const { User } = require("./userClass");
+const { Api } = require("./apiClass");
+
 const fs = require("fs");
 import { Response } from "express";
-import {
-  empSchema,
-} from "./schemas";
+import { empSchema } from "./schemas";
 
 class Crud extends User {
   static jwtVerification(

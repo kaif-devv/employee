@@ -9,11 +9,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const { Api } = require('./apiClass');
-const { Jwt } = require('./jwtClass');
-const fs = require('fs');
-const path = require('path');
-const bcrypt = require('bcrypt');
+const { Api } = require("./apiClass");
+const { Jwt } = require("./jwtClass");
+const fs = require("fs");
+const path = require("path");
+const bcrypt = require("bcrypt");
 class User extends Api {
     static login(req, res, next) {
         const bcrypt = require("bcrypt");
